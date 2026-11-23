@@ -1,0 +1,6 @@
+{
+  "excel": "..\\원클라우드 계약서관리.xlsx",
+  "payment": "..\\8. 입금내역\\입금내역정리.xlsx",
+  "port": 8765,
+  "browser": "edge-app"
+}

@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>원클라우드 사용 현황</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<style>
+.oc{
+  color-scheme: light;
+  --bg:#f3f2ee; --surface:#fcfcfb; --line:#e4e2dc; --grid:#ecebe7;
+  --text:#0b0b0b; --text2:#52514e; --muted:#8a8984;
+  --accent:#2a78d6; --accent-ink:#1c5cab; --zero:#ecebe7;
+  --s100:#cde2fb; --s200:#9ec5f4; --s300:#6da7ec; --s400:#3987e5; --s500:#256abf; --s600:#184f95; --s700:#0d366b;
+  --warn:#c98500; --bad:#e34948;
+  --map-stroke:#fcfcfb;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])) .oc{
+    color-scheme:dark; --bg:#121211; --surface:#1a1a19; --line:#2e2d2a; --grid:#2a2927;
+    --text:#f0efec; --text2:#c3c2b7; --muted:#8f8e88; --accent:#3987e5; --accent-ink:#86b6ef; --zero:#2a2927;
+    --map-stroke:#1a1a19;
+  }
+}
+:root[data-theme="dark"] .oc{
+  color-scheme:dark; --bg:#121211; --surface:#1a1a19; --line:#2e2d2a; --grid:#2a2927;
+  --text:#f0efec; --text2:#c3c2b7; --muted:#8f8e88; --accent:#3987e5; --accent-ink:#86b6ef; --zero:#2a2927;
+  --map-stroke:#1a1a19;
+}
+*{box-sizing:border-box}
+body{margin:0}
+.oc{font-family:"Noto Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px clamp(12px,3vw,32px) 40px;font-size:14px;line-height:1.5}
+.oc-wrap{max-width:1280px;margin:0 auto}
+.oc-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;padding-bottom:16px;border-bottom:2px solid var(--text);margin-bottom:18px}
+.oc-kicker{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--accent-ink)}
+.oc-title{font-size:clamp(22px,3vw,30px);font-weight:900;margin:2px 0 0;letter-spacing:-.02em}
+.oc-sub{color:var(--text2);font-size:13px;margin-top:4px}
+.oc-ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.oc-ctrl label{font-size:12px;color:var(--text2)}
+.oc-sel{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text)}
+.oc-btn{font:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:8px;border:0;background:var(--text);color:var(--surface);cursor:pointer}
+.oc-btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.oc-drop{border:1.5px dashed var(--line);border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;background:var(--surface);font-size:13px;color:var(--text2)}
+.oc-drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+.oc-drop b{color:var(--text)}
+.oc-status{font-size:12px}
+.oc-status.ok{color:#0c8a3a}.oc-status.err{color:var(--bad)}
+.oc-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.oc-kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.oc-kpi .l{font-size:12px;color:var(--text2);font-weight:500}
+.oc-kpi .v{font-size:28px;font-weight:900;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
+.oc-kpi .v small{font-size:14px;font-weight:700;margin-left:2px}
+.oc-kpi .n{font-size:12px;color:var(--muted);margin-top:2px}
+.oc-grid{display:grid;gap:16px;grid-template-columns:repeat(12,1fr)}
+.oc-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.oc-card h2{font-size:15px;font-weight:700;margin:0 0 2px}
+.oc-card .d{font-size:12px;color:var(--muted);margin:0 0 12px}
+.c-map{grid-column:span 7}.c-prov{grid-column:span 5}
+.c-month{grid-column:span 7}.c-sys{grid-column:span 5}
+.c-cust{grid-column:span 5}.c-pipe{grid-column:span 7}
+.c-list{grid-column:span 12}
+@media (max-width:900px){.c-map,.c-prov,.c-month,.c-sys,.c-cust,.c-pipe{grid-column:span 12}}
+.oc-mapbox{position:relative;display:flex;gap:16px;align-items:stretch}
+.oc-mapsvg{flex:1;min-width:0}
+.oc-mapsvg svg{width:100%;height:auto;max-height:560px;display:block}
+.oc-mapsvg path{stroke:var(--map-stroke);stroke-width:1.2;cursor:pointer;transition:opacity .15s}
+.oc-mapsvg path:hover{opacity:.82}
+.oc-mapsvg path.sel{stroke:var(--text);stroke-width:2.2}
+.oc-mapsvg text{pointer-events:none;font-family:inherit}
+.oc-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);margin-top:8px;flex-wrap:wrap}
+.oc-legend i{display:inline-block;width:22px;height:10px;border-radius:2px}
+.oc-tip{position:fixed;pointer-events:none;background:var(--text);color:var(--surface);padding:8px 10px;border-radius:8px;font-size:12px;line-height:1.45;z-index:20;opacity:0;transition:opacity .1s;max-width:240px}
+.oc-tip b{font-size:13px}
+table.oc-t{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.oc-t th{font-size:11px;font-weight:500;color:var(--muted);text-align:left;padding:6px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+.oc-t td{padding:7px 6px;border-bottom:1px solid var(--grid);vertical-align:middle}
+.oc-t td.r,.oc-t th.r{text-align:right}
+.oc-t tr.click{cursor:pointer}
+.oc-t tr.click:hover td{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.oc-t tr.sel td{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.oc-t tfoot td{font-weight:700;border-top:1.5px solid var(--text);border-bottom:0}
+.bar{height:8px;border-radius:0 4px 4px 0;background:var(--accent);min-width:2px}
+.barcell{width:34%}
+.pill{display:inline-block;font-size:11px;padding:1px 7px;border-radius:99px;border:1px solid var(--line);color:var(--text2);white-space:nowrap}
+.pill.new{border-color:var(--accent);color:var(--accent-ink)}
+.pill.plan{border-color:var(--warn);color:var(--warn)}
+.pill.off{color:var(--muted);text-decoration:line-through}
+.oc-chart svg{width:100%;display:block}
+.oc-chart .ax{font-size:11px;fill:var(--muted)}
+.oc-chart .lab{font-size:11px;fill:var(--text2);font-weight:700}
+.oc-filter{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.oc-filter input{font:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);min-width:180px}
+.oc-scroll{overflow:auto;max-height:520px}
+.oc-note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.7}
+.oc-note b{color:var(--text2)}
+.pipe-sec{font-size:12px;font-weight:700;color:var(--text2);margin:10px 0 4px}
+.pipe-item{display:grid;grid-template-columns:110px 90px 1fr;gap:8px;padding:7px 0;border-bottom:1px solid var(--grid);font-size:13px}
+.pipe-item .who{color:var(--text2)}
+.pipe-item.drop{color:var(--muted)}
+@media (max-width:560px){.pipe-item{grid-template-columns:1fr}.oc-mapbox{flex-direction:column}}
+.oc-tabs{display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+.oc-tab{font:inherit;font-size:14px;font-weight:700;padding:10px 16px;border:0;background:transparent;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+.oc-tab[aria-selected="true"]{color:var(--text);border-bottom-color:var(--text)}
+.oc{--py-bill:#2a78d6;--py-paid:#1baf7a;--py-ok:#d6ebf9;--py-ok-ink:#184f95;--py-late:#fbe7b6;--py-late-ink:#7a5200;--py-due:#fbd5d4;--py-due-ink:#a3201f;--py-part:#fde3c8;--py-part-ink:#8a3c0c}
+:root[data-theme="dark"] .oc{--py-bill:#3987e5;--py-paid:#199e70;--py-ok:#1d3552;--py-ok-ink:#b7d3f6;--py-late:#4a3a12;--py-late-ink:#f3d58a;--py-due:#55201f;--py-due-ink:#ffb3b2;--py-part:#4d2e14;--py-part-ink:#ffc796}
+@media (prefers-color-scheme: dark){:root:where(:not([data-theme="light"])) .oc{--py-bill:#3987e5;--py-paid:#199e70;--py-ok:#1d3552;--py-ok-ink:#b7d3f6;--py-late:#4a3a12;--py-late-ink:#f3d58a;--py-due:#55201f;--py-due-ink:#ffb3b2;--py-part:#4d2e14;--py-part-ink:#ffc796}}
+.py-legend{display:flex;gap:14px;font-size:12px;color:var(--text2);margin:-4px 0 6px}
+.py-legend i,.py-key i.k{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.py-key{font-size:11px;color:var(--text2);display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.py-key i.paid{background:var(--py-ok)}.py-key i.late{background:var(--py-late)}.py-key i.part{background:var(--py-part)}.py-key i.due{background:var(--py-due)}.py-key i.future{background:transparent;border:1px dashed var(--line)}
+.py-grid th,.py-grid td{text-align:center;padding:4px 3px;font-size:12px}
+.py-grid th:first-child,.py-grid td:first-child{text-align:left;position:sticky;left:0;background:var(--surface);z-index:1;min-width:130px;padding-left:6px}
+.py-grid thead th{position:sticky;top:0;background:var(--surface);z-index:2}
+.py-grid thead th:first-child{z-index:3}
+.py-grid td.c{min-width:52px}
+.py-grid td.c span{display:block;border-radius:5px;padding:4px 2px;font-variant-numeric:tabular-nums;line-height:1.2}
+.py-grid .s-paid span{background:var(--py-ok);color:var(--py-ok-ink)}
+.py-grid .s-late span{background:var(--py-late);color:var(--py-late-ink)}
+.py-grid .s-part span{background:var(--py-part);color:var(--py-part-ink);font-weight:700}
+.py-grid .s-due span{background:var(--py-due);color:var(--py-due-ink);font-weight:700}
+.py-grid .s-future span{border:1px dashed var(--line);color:var(--muted)}
+.py-grid .s-none span{color:var(--muted)}
+.py-grid td.amt{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;padding-right:8px}
+.py-grid td.amt.bad{color:var(--py-due-ink);font-weight:700}
+.py-grid tr:hover td{background:color-mix(in srgb,var(--accent) 5%,var(--surface))}
+.py-grid tr:hover td:first-child{background:color-mix(in srgb,var(--accent) 5%,var(--surface))}
+.py-name{cursor:pointer;font-weight:700;background:none;border:0;padding:0;font:inherit;font-weight:700;color:var(--text);text-align:left}
+.py-name:hover{text-decoration:underline}
+.py-dlg{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:30;padding:16px}
+.py-dlg[hidden]{display:none}
+.py-dlg-box{background:var(--surface);border-radius:14px;max-width:560px;width:100%;max-height:85vh;overflow:auto;padding:20px;position:relative}
+.py-x{position:absolute;right:14px;top:14px;padding:6px 10px}
+.py-badge{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:99px}
+.py-badge.due{background:var(--py-due);color:var(--py-due-ink)}
+.py-badge.ok{background:var(--py-ok);color:var(--py-ok-ink)}
+</style>
+</head>
+<body>
+<div class="oc" id="app">
+<div class="oc-wrap">
+  <nav class="oc-tabs" role="tablist">
+    <button class="oc-tab" role="tab" data-tab="usage" aria-selected="true" type="button">사용 현황</button>
+    <button class="oc-tab" role="tab" data-tab="pay" aria-selected="false" type="button">입금 현황</button>
+  </nav>
+  <section id="tab-usage">
+  <header class="oc-head" id="hdr">
+    <div>
+      <div class="oc-kicker">ONECLOUD · 운영 현황 보고</div>
+      <h1 class="oc-title">원클라우드 사용 현황 <span id="ttlYear"></span></h1>
+      <div class="oc-sub" id="subline"></div>
+    </div>
+    <div class="oc-ctrl">
+      <label for="asof">매출 기준월</label>
+      <select class="oc-sel" id="asof"></select>
+      <button class="oc-btn ghost" id="resetBtn" type="button" title="처음 내장된 데이터로 되돌리기">기본 데이터</button>
+      <button class="oc-btn" id="pickBtn" type="button">엑셀 불러오기</button>
+      <input type="file" id="file" accept=".xlsx,.xls,.xlsm" hidden>
+    </div>
+  </header>
+
+  <div class="oc-drop" id="drop">
+    <div><b>데이터 갱신</b> — 수정한 원클라우드 사용현황 엑셀을 여기에 끌어다 놓으면 지도·매출·목록이 즉시 다시 계산됩니다.</div>
+    <div class="oc-status" id="status"></div>
+  </div>
+
+  <section class="oc-kpis" id="kpis"></section>
+
+  <div class="oc-grid">
+    <section class="oc-card c-map" id="mapCard">
+      <h2>도별 분포 현황</h2>
+      <p class="d">사용 중인 업체 수 기준 · 지역을 누르면 아래 목록이 그 지역으로 걸러집니다</p>
+      <div class="oc-mapbox"><div class="oc-mapsvg" id="map"></div></div>
+      <div class="oc-legend" id="mapLegend"></div>
+    </section>
+
+    <section class="oc-card c-prov" id="provCard">
+      <h2>시·도별 업체 수 · <span class="yr"></span>년 누적 매출</h2>
+      <p class="d" id="provDesc"></p>
+      <table class="oc-t" id="provTable"></table>
+    </section>
+
+    <section class="oc-card c-month" id="monthCard">
+      <h2>월별 매출 추이 (<span class="yr"></span>년)</h2>
+      <p class="d">월 이용료 기준, 사용 시작월부터 집계 · 부가세 별도</p>
+      <div class="oc-chart" id="monthChart"></div>
+    </section>
+
+    <section class="oc-card c-sys" id="sysCard">
+      <h2>시스템별 사용 업체</h2>
+      <p class="d">CMS · MES · QMS 등 사용 모듈 기준 (복수 사용 포함)</p>
+      <div class="oc-chart" id="sysChart"></div>
+    </section>
+
+    <section class="oc-card c-cust" id="custCard">
+      <h2>고객사(모기업)별 누적 매출</h2>
+      <p class="d">협력사가 속한 고객사 기준 상위 8곳</p>
+      <div class="oc-chart" id="custChart"></div>
+    </section>
+
+    <section class="oc-card c-pipe" id="pipeCard">
+      <h2>영업 파이프라인</h2>
+      <p class="d">엑셀 하단 ‘영업 진행 / 영업 종료’ 영역</p>
+      <div id="pipe"></div>
+    </section>
+
+    <section class="oc-card c-list" id="listCard">
+      <h2>업체 목록</h2>
+      <div class="oc-filter">
+        <input id="q" type="search" placeholder="업체명·고객사·시스템 검색">
+        <select class="oc-sel" id="fProv"></select>
+        <select class="oc-sel" id="fSt">
+          <option value="">전체 상태</option><option value="active">사용 중</option><option value="new">올해 신규</option><option value="plan">도입 예정</option><option value="off">해지</option>
+        </select>
+        <span class="oc-status" id="listCount"></span>
+      </div>
+      <div class="oc-scroll"><table class="oc-t" id="list"></table></div>
+      <div class="oc-note" id="notes"></div>
+    </section>
+  </div>
+  </section>
+  <section id="tab-pay" hidden>
+  <header class="oc-head">
+    <div>
+      <div class="oc-kicker">ONECLOUD · 입금 관리</div>
+      <h1 class="oc-title">원클라우드 입금 현황 <span id="pyTtl"></span></h1>
+      <div class="oc-sub" id="pySub"></div>
+    </div>
+    <div class="oc-ctrl">
+      <label for="pyAsof">미수 기준월</label>
+      <select class="oc-sel" id="pyAsof"></select>
+      <button class="oc-btn ghost" id="pyRefresh" type="button">지금 새로고침</button>
+      <button class="oc-btn ghost" id="pyOpen" type="button">원본 엑셀 열기</button>
+    </div>
+  </header>
+  <div class="oc-drop"><div><b>자동 갱신</b> — <span id="pyPath">입금내역정리.xlsx</span> 파일을 지켜보고 있다가, 저장하면 다시 계산합니다.</div><div class="oc-status" id="pyStatus"></div></div>
+  <section class="oc-kpis" id="pyKpis"></section>
+  <div class="oc-grid">
+    <section class="oc-card c-month" id="pyMonthCard">
+      <h2>월별 청구액 · 입금액</h2>
+      <p class="d">각 월 이용료 기준(부가세 포함) · 막대에 올리면 수납률과 미납 업체가 보입니다</p>
+      <div class="py-legend"><span><i style="background:var(--py-bill)"></i>청구액</span><span><i style="background:var(--py-paid)"></i>입금액</span></div>
+      <div class="oc-chart" id="pyMonth"></div>
+    </section>
+    <section class="oc-card c-sys" id="pyDueCard">
+      <h2>미수금 업체</h2>
+      <p class="d" id="pyDueDesc"></p>
+      <div class="oc-scroll" style="max-height:330px"><table class="oc-t" id="pyDue"></table></div>
+    </section>
+    <section class="oc-card c-list" id="pyGridCard">
+      <h2>업체별 월 입금 내역</h2>
+      <div class="oc-filter">
+        <input id="pyQ" type="search" placeholder="업체명 검색">
+        <select class="oc-sel" id="pySort"><option value="sheet">엑셀 순서</option><option value="due">미수금 많은 순</option><option value="name">이름 순</option></select>
+        <select class="oc-sel" id="pyOnly"><option value="">전체 업체</option><option value="due">미수 업체만</option><option value="late">지연 입금 있는 업체</option></select>
+        <span class="py-key"><i class="k paid"></i>입금 <i class="k late"></i>늦은 입금(다음달 말 넘김) <i class="k part"></i>일부 입금 <i class="k due"></i>미납 <i class="k future"></i>기준월 이후</span>
+      </div>
+      <div class="oc-scroll" style="max-height:640px"><table class="oc-t py-grid" id="pyGrid"></table></div>
+      <div class="oc-note">칸 안 날짜는 입금일입니다. 금액은 엑셀 ‘입금내역정리’의 월금액·입금액(부가세 포함)을 그대로 씁니다. 미수금은 기준월까지 청구된 금액에서 입금액을 뺀 값입니다. 업체 이름을 누르면 월별 상세가 열립니다.</div>
+    </section>
+  </div>
+  <div class="py-dlg" id="pyDlg" hidden><div class="py-dlg-box"><button class="oc-btn ghost py-x" id="pyX" type="button">닫기</button><div id="pyDlgBody"></div></div></div>
+  </section>
+</div>
+<div class="oc-tip" id="tip"></div>
+</div>
+
+<script id="embedded" type="application/json">{"file": "원클라우드 사용현황.xlsx", "sheets": {"사용": {"aoa": [["클라우드 전환 완료", null, null, "안쓰는 업체", "계약해지", null, null, null, null, null, null, null, null, null, null, null, null, null], ["No", "코드", "전환코드", "법인명(상호)", "사용시작일", "월금액", "년금액", "고객사", "사업장번호", "대표자", "주소", "세금계산서 Email", "종목", "담당자", "담당자 연락처", "담당자 Email", "시스템", "비고"], [1, "2020", "2020", "계명산업㈜", {"d": "2025-04-01"}, 200000, "=F3*12", "네오오토", "134-81-45629", "박유훈", "경기도 화성시 남양읍 주석로 184번길 57", "kemico@empas.com", "단조", "홍광기 부장", "010-5229-0743", "kemico@empas.com", "CMS", "화성"], [2, "2030", "2030", "유창정밀공업", {"d": "2025-04-01"}, 200000, "=F4*12", "네오오토", "609-31-92636", "구병규", "경상남도 창원시 의창구 평산로 8번길 19-40", "tax@ycpf.kr", "단조", "김수영 과장", "010-9208-9497", "ksy@ycpf.kr", "CMS", "창원"], [3, "2110", "2110", "㈜비엠", {"d": "2025-04-01"}, 200000, "=F5*12", "네오오토", "515-81-19086", "박병욱", "경상북도 영천시 영천산단로 331", "yengji0274@naver.com", "가공", "김종준 차창", "010-4220-8284", "yengji0273@daum.net", "CMS", "영천 익익월 5일 결제"], [4, "2120", "2120", "유성하이테크㈜", {"d": "2025-04-01"}, 200000, "=F6*12", "네오오토", "505-81-53544", "김국철", "경상북도 영천시 언하공단2길 46", "yusunghitech08@hanmail.net", "가공", "모신종 차장", "010-7222-2267", "six0615@daum.net", "CMS", "영천"], [5, "2130", "2130", "㈜성문테크", {"d": "2025-04-01"}, 200000, "=F7*12", "네오오토", "505-81-60782", "김도범", "경상북도 경주시 천북면 천북로 222-2", "smt0801@naver.com", "가공", "김종엽 차장", "010-8598-8986", "smt0801@naver.com", "CMS", "경주"], [6, "2140", "2140", "저스트㈜", {"d": "2025-04-01"}, 200000, "=F8*12", "네오오토", "615-81-56682", "김종락", "경상남도 김해시 진례면 송현리 913", "justcompany@hanmail.net", "가공", "백승우 부장", "010-7337-0514", "justcompany@daum.net", "CMS", "김해"], [7, "2150", "2150", "현주산업", {"d": "2025-04-01"}, 200000, "=F9*12", "네오오토", "613-05-66671", "정현근", "경상남도 진주시 정촌면 산업로 30", "hyunju7220@hanmail.net", "가공", "한병석 팀장", "010-5526-4542", "hyunju7220@daum.net", "CMS", "진주"], [8, "2160", "2160", "㈜)명천공업", {"d": "2026-05-01"}, 200000, "=F10*12", "네오오토", "613-81-73346", "김춘식", "경상남도 사천시 사남면 공단1로 59-37", "mcgear@hanmail.net", "가공", "편준호 부장", "010-2995-0770", "mcgear@hanmail.net", "CMS", "사천"], [9, "2170", "2170", "㈜웅전공업", {"d": "2026-05-01"}, 200000, "=F11*12", "네오오토", "613-81-26687", "조영희", "경상남도 진주시 정촌면 연꽃로145번길 40-20", "woongjunind@hanafos.com", "가공", "김남훈 이사", "010-4875-1399", "japan-nh@hanmail.net", "CMS", null], [10, "2210", "2210", "동우HST㈜", {"d": "2025-04-01"}, 200000, "=F12*12", "네오오토", "133-81-27822", "정수진", "충청남도 당진시 순성면 틀모시로 46-5", "dylee@dwhst.co.kr", "열처리", "조민형 선임", "010-3427-7135", "ps-mhjo@dwhst.co.kr", "CMS", "당진"], [11, "2220", "2220", "㈜영풍열처리(현풍,성서)", {"d": "2025-04-01"}, 200000, "=F13*12", "네오오토", "514-81-82723", "권숙철 ", "대구광역시 달성군 유가면 테크노중앙대로 120", "yp1987@heat-treatment.co.kr", "열처리", "이정훈 차장", "010-5550-8692", "na0724@heat-treatment.co.kr", "CMS", "달성"], [12, "2230", "2230", "드림열처리㈜", {"d": "2025-04-01"}, 200000, "=F14*12", "네오오토", "134-86-75453", "최병길", "경기도 안산시 단원구 번영로82번길 18, 4마 604호", "dream75453@daum.net", "열처리", "양호영 대리", "010-2567-9489", "ghdud662@naver.com", "CMS", "안산"], [13, "3050", "3050", "(주)지엠오토", {"d": "2025-08-01"}, 200000, "=F15*12", "대우풍기", "143-81-03225", "박종배", "경기도 화성시 남양읍 신현대로 55-2", "tax@gmauto.co.kr", "프레스, 용접", "박찬수 이사", "010-9070-5803", "srff8@naver.com", "CMS", null], [14, "3025", null, "(주)대웅에스앤티", null, 200000, "=F16*12", "대우풍기", "410-81-46269", "강용선", "광주광역시 광산구 평동산단3번로114(옥동)", "daewoongst@naver.com", "프레스, 용접", "조승호 차장", "010-4019-3662", "wgtmdgh1356@hanmail.net", "CMS", "회사 : 062-975-1100"], [15, "3038", null, "(주)금호기공", null, 200000, "=F17*12", "대우풍기", "410-81-59288", "고광옥", "광주광역시 광산구 평동산단5번우로 40(월전동)", "khstl@chol.com", "프레스, 용접", "김윤옥", "010-5045-6294", "sion0608@nate.com", "CMS", "회사 : 062-943-3051"], [16, "3040", null, "만영공업(주)", null, 200000, "=F18*12", "대우풍기", "123-81-58371", "박만기", "경기도 평택시 포승읍 평택항로 268번길 139", "manybill@hanmail.net", "프레스, 용접", "박정민 상무", "010-9010-7048", "joecometrue@gmail.com", "CMS", "회사 : 031-682-2806, 7.5 - 분기(6개월, 6월, 12월)마다 세금계산서 발행"], [17, "3041", null, "(주)시흥금속", null, 200000, "=F19*12", "대우풍기", "410-86-15306", "이동균", "광주광역시 광산구 오선동 273-42", "jess7th@hnmail.net", "프레스, 용접", "서순태 부장", "010-4422-9044", "jess7th@hanmail.net", "CMS", ""], [18, "3042", null, "(주)수성테크", null, 200000, "=F20*12", "대우풍기", "409-86-12255", "이숙희", "전라남도 장성군 동화면 전자농공단길1길 13", "sstech3500@hanmail.net", "프레스, 용접", "김철 이사", "010-2602-2686", "sstech3500@hanmail.net", "CMS", "010-2602-2686"], [19, "3043", null, "(주)지코엔지니어링", "2026-07-31", null, null, "대우풍기", "410-81-46954", "김종인", "광주광역시 광산구 하남산단9번로 186-22(도천동)", "jicoeng@hanmail.net", "프레스, 용접", "장민의 차장", "010-2651-9712", "kindmini@hanmail.net", "CMS", "010-2651-9712"], [20, "3045", null, "영신공업(주)", null, 200000, "=F22*12", "대우풍기", "134-81-98505", "배성우", "경기도 안산시 단원구 진흥로102번길 60(성곡동)", "ys2082@bill36524.com", "프레스, 용접", "박광식 부장", "010-2746-3215", "y.shin@hanmail.net", "CMS", "이유경 (031-497-3758. 2082)"], [21, "3046", null, "대륭강업(주)", null, 200000, "=F23*12", "대우풍기", "133-81-24918", "서원상", "경기도 화성시 장안면 포승장안로 980, 나동", "leehwanlove@daum.net", "프레스, 용접", "김명수 차장", "010-3722-6654", "masonk@hanmail.net", "CMS", ""], [22, "3055", null, "성정기업", {"d": "2025-05-22"}, 200000, "=F24*12", "대우풍기", "410-22-92747", "최영식", "광주광역시 광산구 장덕동 990-3", "sj6715@hanmail.net", "프레스, 용접", "황인걸", "", "sj6715@hanmail.net", "CMS", "010-4028-0259  (미납으로 사용중지) -20.06.04 임시로 오픈 (입금내역 확인용)"], [23, "3057", null, "서천산업(주)", null, 200000, "=F25*12", "대우풍기", "410-81-83833", "김춘식", "광주광역시 광산구 평동산단 3번로 98(옥동)", "jhoongam@hanmail.net", "프레스, 용접", "이학순 이사", "010-6792-1667", "jhoongam@hanmail.net", "CMS", ""], [24, "3078", null, "(주)광일기공", "QMS", 200000, "=F26*12", "대우풍기", "410-81-12736", "김대영", "광주광역시 광산구 하남산단천변우로120(도천동)", "kwang6013@naver.com", "프레스, 용접", "서정채 부장", "010-8519-9364", "jjsjcgg@hanmail.net", "QMS", "062-951-6013 김은진대리 : 010-3642-6949"], [25, "3105", null, "신우기업(주)", null, 200000, "=F27*12", "대우풍기", "410-87-02152", "김경섭", "광주광역시 광산구 평동산단로 225-44", "kk8043@naver.com", "프레스, 용접", "박동오", "010-3648-7225", "kk8043@naver.com", "CMS", ""], [26, "3108", null, "(주)삼원테크", {"d": "2025-04-30"}, 200000, "=F28*12", "대우풍기", "409-86-47545", "이재수", "광주광역시 북구 양일로 141-1(양산동)", "samwon3739@hanmail.net", "프레스, 용접", "이금산 이사", "010-3906-6338", "lks6338@nate.com", "CMS", ""], [27, "3111", null, "(주)풍원정공", null, 200000, "=F29*12", "대우풍기", "124-86-92213", "심창섭", "경기도 화성시 향남읍 발안공단로 295", "npw1371@hanmail.net", "프레스, 용접", "이문주", "010-6541-2254", "npw1371@hanmail.net", "CMS", ""], [28, "3120", null, "(주)유진정공", null, 200000, "=F30*12", "대우풍기", "312-81-19702", "홍준우", "충청남도 예산군 예산읍 벚꼴로 388번길 20", "jij@yu-jin.com", "프레스, 용접", "맹조영 차장", "010-7151-7525", "jij@yu-jin.com", "CMS", ""], [29, "3130", "3130", "(주)에이스윈", {"d": "2025-06-24"}, 200000, "=F31*12", "대우풍기", "239-88-02486", "전제윤", "충청남도 아산시 영인면 아산호로840번길 153", "acewin5500@naver.com", "프레스, 용접", null, "010-3901-8809", null, "CMS", ""], [30, "3135", "3135", "㈜세진오토", {"d": "2026-05-01"}, 200000, "=F32*12", "대우풍기", "140-81-23620", "김정세", "경기도 화성시 만세구 팔탄면 현대기아로 44-24", "sejin077@naver.com", "프레스, 용접", "이찬호 대리", "010-5530-0823", "sejin077@naver.com", "CMS", "초기구축비 200만원"], [31, "3004", "3004", "(주)에스아이이엔지", null, 150000, "=F33*12", "아이아", "134-86-36203", "박제근", "경기도 안산시 단원구 진흥로38번길 60", "dud7773@nate.com", "금형,전자부품", "김태철", "010-9260-7187", "ktc3150@naver.com", "CMS", "2021-01부터 5만원할인, 부가세포함 165000원"], [32, "3010", null, "(주)에스케이에프", null, 200000, "=F34*12", "에코", "125-81-36577", "홍종학", "경기도 평택시 서탄면 서탄2로 206", "skf9856@bill36524.com", "전자부품", "최성용 과장", "010-8985-4653", "sychoi9856@naver.com", "CMS", ""], [33, "3014", null, "(유)보금", {"d": "2025-02-10"}, 200000, "=F35*12", "에코", "621-81-33307", "김도형", "경상남도 양산시 소주공단5길 3(주남동)", "b11488@daum.net", "프라스틱표면가공", "김대근 부장", "010-4542-2620", "aozora0401@daum.net", "CMS", "회사 : 055-386-0622"], [34, "3020", "3020", "(주)준영피엔피", {"d": "2015-11-01"}, 200000, "=F36*12", "에코", "610-85-35531", "손창환", "울산광역시 울주군 웅촌면 고연공단3길 29(,7)", "yndbc@hanmail.net", "도장", "신수복 부장", "010-5029-6663", "yndbc@hanmail.net", "CMS", "회사 : 052-257-0290"], [35, "3021", null, "(주)에스씨티", null, 200000, "=F37*12", "에코", "610-81-90176", "김영우", "울산광역시 울주군 웅촌면 반계길 62-8", "scspray@hanmail.net", "도장", "문대업 전무", "010-3904-6880", "scspray@hanmail.net", "CMS", "회사 : 052-227-0692 강영희"], [36, "3080", null, "(유)신원", "2022-01-19", 200000, "=F38*12", "에코", "621-81-39413", "김도형", "경상남도 양산시 소주공단 5길 13", "sinwon5334@daum.net", "사출, 조립", "박용배 차장", "010-2858-1839", "a00511@kornet.net", "CMS", ""], [37, "3027", null, "성심정밀㈜", null, 200000, "=F39*12", "일지테크", "505-81-41960", "이두형", "경상북도 영천시 청통면 신학리 520-6", "ss6989@hanmail.net", "프레스, 용접", "이재성 과장", "010-8245-6988", "ss6989@hanmail.net", "CMS", ""], [38, "3029", "3029", "㈜길창", {"d": "2025-07-01"}, 200000, "=F40*12", "일지테크", "515-81-42501", "김창구", "경상북도 경산시 진량읍 공단7로 58", "gc4926@naver.com", "제조업 자동차부품", "박건우 차장", "010-2962-9033", "gc4926@naver.com", "CMS", null], [39, "3060", "3060", "㈜케이엔씨", {"d": "2025-08-01"}, 350000, "=F41*12", "일지테크", "515-81-41948", "구준희", "경상북도 경산시 진량읍 공단7로 22", "euny0618@naver.com", "제조업 자동차부품", "박은영 책임", null, null, "CMS,MES", null], [40, "3036", null, "우성전자", null, 250000, "=F42*12", "㈜서연전자", "130-20-73082", "임무성", "경기도 부천시 오정구 고강1동 308-10 ", "ws-eng@nate.com", "하네스", "안선미 이사", "010-3892-5491", "ws-eng@nate.com", "MES,EMS", ""], [41, "3039", null, "(주)동민금속", null, 200000, "=F43*12", "구영테크", "503-86-01934", "김용태", "대구광역시 서구 와룡로90길 37(이현동)", "dm5068@hanmail.net", "프레스, 용접", "김동진 차장", "010-7670-4681", "dm5068@hanmail.net", "CMS", "사장휴대번호 : 010-3814-3317"], [42, "3044", null, "(주)영풍기계", "QMS", 200000, "=F44*12", "세코그룹", "505-81-10472", "이용철", "경상북도 경주시 외동읍 모화공단길 165", "jwp200@y-poong.co.kr", "프레스, 조립", "이민형 과장", "010-7464-2156", "leemin6745@y-poong.co.kr", "QMS", "입금은 20. 4월분 부터 시작 (3월은 안함)"], [43, "3071", "3071", "한서화학(주)", {"d": "2025-03-01"}, 200000, "=F45*12", "보쉬코리아", "505-81-07564", "김태윤", "경상북도 경주시 안강읍 안현로 919", "hanseoco@empas.com", "사출, 조립", "이창수 부장", "010-5457-9324", "note0@hanmail.net", "CMS", "산업혁신운동"], [44, "3076", null, "태일탑", null, 100000, "=F46*12", "", "131-86-45815", "황영일", "인천광역시 남동구 앵고개로 595", "teiltop9155@naver.com", "전자부품 및 금형", "황영일 대표", "010-4726-8325", "teiltop@naver.com", "CMS", "032-446-0540"], [45, "3090", null, "화진지엔씨", null, null, null, null, null, null, null, null, null, null, null, null, null, null], [46, "3099", null, "(주)한신단자공업", null, 350000, "=F48*12", "", "131-86-16135", "정수영", "인천광역시 남동구 남동동로 33번길 28-17", "admin@hstml.com", "전자부품,무역품", "김석래 부장", "010-5449-7501", "srkim@hstml.com", "CMS,MES", "초기셋팅비 : 2,500,000원 H/W비 : 470,000원 "], [47, "3102", null, "대양테크㈜", null, 250000, "=F49*12", "프라코", "124-86-05299", "송영철", "경기도 화성시 북양동 400-7", "dyrubber@nate.com", "고무제품,합성수지", "박성재 부장", "010-5593-7078", "lgtwinsd@sungilg게.co.kr", "MES", "교육지원비 : 2,500,000원"], [48, "3103", null, "(주)경보라인", null, 270000, "=F50*12", "", "505-81-30105", "박운형", "경상북도 경주시 천북면 신당소티고개길85-24", "gybo8671@naver.com", "고무스폰지가공, 자동차부품", "배종성 이사", "010-9650-0697", "gybo8671@naver.com", "CMS,MES", "2023. 01. 부터 월 385,000원"], [49, "4010", "4010", "㈜세양", {"d": "2025-08-01"}, 300000, "=F51*12", "카이엠", "606-81-95191", "전병선", "경상남도 양산시 용단산단4길 13", "sy47244@naver.com", "제조, 자동차부품", "전승호 이사", "010-9207-7008", "sy47244@naver.com", "CMS,MES,QMS", null], [50, "4100", null, "중화테크(제이에이치테크)", "MES", 250000, "=F52*12", "카이엠", "505-13-06251", "박단효", "경상북도 경주시 외동읍 문산2산단1로 70-8", "cjsflgid4580@daum.net", "조립", "김정수 부장", "010-9487-4580", "cjsflgid4580@daum.net", "MES", "세금계산서 후발행 24년 4월 분 -> 24년 4월 말에 발행됨/ 사용 종료시 해당 월분 발행하면됨"], [51, "4670", null, "(주)대신산업", null, 350000, "=F53*12", "", "134-81-86047", "도판수", "경기도 안산시 단원구 산단로67번길 143 (목내동)", "daeshin047@bill36524.com", "프레스, 용접", "손기중 부장", "010-5232-9227", "sonkz@naver.com", "CMS,MES", "회사 : 031-499-4670 초기셋팅지원비 : 2,500,000원"], [52, "6010", "6010", "다산플라스틱", {"d": "2026-05-01"}, 500000, "=F54*12", "삼보모터스", "513-19-13167", "장윤희", "경상북도 칠곡군 북삼읍 칠곡대로 274-23", "addwin7@hanmail.net", "사출, 압출", "이명략 차장", "010-8612-3253", "addwin7@hanmail.net", "CMS,MES", "초기셋팅지원비 : 12,00,000원 H/W : 7,000,000원"], [52, "6020", "6020", "티와이에스앤티", {"d": "2026-06-01"}, 550000, "=F55*12", "삼보모터스", "738-52-00439", "김태영", "경상남도 창원시 의창구 대산면 주남로503번길 26-18", "tys738@daum.net", "틴티드 도장", "윤관섭 부사장", "010-3802-3158", "yoonks2022@tysnt.com", "CMS,MES", "초기셋팅지원비 : 7,000,000원 H/W : 7,240,000원"], [53, "6030", "6030", "아시아나테크㈜", {"d": "2026-09-01"}, null, null, "삼보모터스", "513-81-39368", "임규화", "경상북도구미시1공단로153(공단동)", "asianatech@naver.com", "전자.전기부품/자동차부품", "임현진 공장장", "010-8650-7847", "asianatech@naver.com", "CMS,MES", "자동차부품재단 사업 진행"], [54, "6040", "6040", "㈜진보P&C", {"d": "2026-12-01"}, 200000, "=F57*12", "삼보모터스", "476-87-02531", "김동길", "경상남도 김해시 진영읍 김해대로 118-46", "jinbo@jinbopnc.bizmeka.com", "도장 및 기타 피막처리업", "박찬호 사원", "010-2090-4885", "phc@jinbopnc.bizmeka.com", "CMS", "초기셋팅지원비 : 5,520,000원 H/W : 1,700,000원"], [53, "9010", "9010", "㈜세원하이텍", {"d": "2026-09-01"}, 550000, "=F58*12", "남양", "123-81-68597", "장광현", "경기도 수원시 권선구 오목천로108번길 7 (고색동)", "jsw9427@hanmail.net", "가공", "남상만 이사", "010-5213-5567", "sw-test@sewon-hitech.com", "CMS,MES", "초기셋팅지원비 : 12,000,000원 H/W : 자체구비"], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, "영업 진행", null, null, null, null, null, null, "K-Mobility재단 사업 참여 의향 업체 ", null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, "영신공업(박광식 부장)", null, null, null, null, null, null, null], [null, null, null, "성지산업 CMS", "최용석 차장", "10/7 견적 및 소개 메일, 11/3 1,2공장 병합 후 연락 주신다고 함", null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, "영신공업", "박광식 부장", "10/21 방문, MES 도입, MMS 구버전 도입 검토", null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, "이즈테크", "황성민 이사", "10/13 방문, MES 설명", null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, "영업 종료", null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, "대일강업", "신현식 과장", "9/12 방문, CMS, MES 설명 및 견적, 11/3 DROP 전달 받음", null, null, null, null, null, null, null, null, null, null, null, null]], "fill": [[{"theme": 7, "tint": 0.5999938962981048}, null, null, {"rgb": "FFFFC000"}, {"theme": 0, "tint": -0.499984740745262}, null, null, null, null, null, null, null, null, null, null, null, null, null], [{"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}, {"theme": 9, "tint": 0.7999816888943144}], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [{"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"rgb": "FFFFC000"}, {"rgb": "FFFFC000"}, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"rgb": "FFFFC000"}, {"rgb": "FFFFC000"}, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, {"theme": 0, "tint": 0.0}, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, {"theme": 9, "tint": 0.0}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"rgb": "FFFFC000"}, {"rgb": "FFFFC000"}, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"rgb": "FFFFC000"}, {"rgb": "FFFFC000"}, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [{"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}, {"theme": 0, "tint": -0.499984740745262}], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, {"theme": 4, "tint": 0.7999816888943144}, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]]}, "종료": {"aoa": [["No", "코드", "전환코드", "법인명(상호)", "종료일", "금액", "고객사", "사업장번호", "대표자", "주소", "세금계산서 Email", "종목", "담당자", "담당자 연락처", "담당자 Email", "시스템", "비고", null], [1, "2010", null, "경진단조㈜", "계약파기", 200000, "네오오토", "622-81-10802", "고재형", "경상남도 김해시 진영읍 본산로 212번길 32", "kjfqa@daum.net", "단조", "윤득열 과장", "010-2988-9911", "kjfqa@daum.net", "CMS", "김해", null], [2, "3002", null, "제경산업", "2015-02-28", 100000, "프라코", "124-27-74372", "원유돈", "경기도 화성시 안녕남로142번길 17-6 (안녕동)", "ssuni4356@daum.net", "사출, 도장", "신진호 부장", "010-8864-4882", "sjh-882@hanmail.net", "CMS", null, null], [3, "3031", null, "㈜정하이텍", {"d": "2025-04-30"}, 150000, "일지테크", "505-13-83904", "정창섭", "경상북도 영천시 대창면 한제길 12-30", "jht5429@naver.com", "제조업 자동차부품", "이용석 과장", "010-3881-1444", "jht5429@naver.com", "CMS", null, null]], "fill": [[{"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, {"rgb": "FFC0E0FF"}, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]]}}}</script>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const EMB=JSON.parse(document.getElementById('embedded').textContent);
+const fmtN=n=>Math.round(n).toLocaleString('ko-KR');
+const won=n=>{ // 만원/억 단위
+  if(Math.abs(n)>=1e8){const e=Math.floor(n/1e8), m=Math.round((n-e*1e8)/1e4);return e+'억'+(m?' '+m.toLocaleString('ko-KR')+'만':'')+'원';}
+  return Math.round(n/1e4).toLocaleString('ko-KR')+'만원';
+};
+const wonShort=n=>n>=1e8?(n/1e8).toFixed(2).replace(/\.?0+$/,'')+'억':Math.round(n/1e4).toLocaleString('ko-KR')+'만';
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const PROVS=[
+  ['서울','서울','seoul'],['부산','부산','busan'],['대구','대구','daegu'],['인천','인천','incheon'],['광주','광주','gwangju'],
+  ['대전','대전','daejeon'],['울산','울산','ulsan'],['세종','세종','sejong'],['경기','경기','gyeonggi'],['강원','강원','gangwon'],
+  ['충청북','충북','north-chungcheong'],['충북','충북'],['충청남','충남','south-chungcheong'],['충남','충남'],
+  ['전라북','전북','north-jeolla'],['전북','전북'],['전북특별','전북'],['전라남','전남','south-jeolla'],['전남','전남'],
+  ['경상북','경북','north-gyeongsang'],['경북','경북'],['경상남','경남','south-gyeongsang'],['경남','경남'],['제주','제주','jeju']
+];
+const ID2P={};PROVS.forEach(p=>{if(p[2])ID2P[p[2]]=p[1];});
+const P_ORDER=['서울','인천','경기','강원','충북','세종','대전','충남','전북','광주','전남','경북','대구','울산','경남','부산','제주'];
+function provOf(addr){const a=String(addr||'').replace(/\s/g,'');for(const p of PROVS){if(a.startsWith(p[0]))return p[1];}return '미상';}
+
+// ---------- 날짜 ----------
+function toYM(v){
+  if(v==null||v==='')return null;
+  if(typeof v==='object'&&v.d){const [y,m]=v.d.split('-').map(Number);return {y,m};}
+  if(v instanceof Date&&!isNaN(v)){const d=new Date(v.getTime()+6*3600e3);return {y:d.getFullYear(),m:d.getMonth()+1};}
+  if(typeof v==='number'&&v>20000&&v<80000){const d=new Date(Math.round((v-25569)*864e5));return {y:d.getUTCFullYear(),m:d.getUTCMonth()+1};}
+  const s=String(v).trim();const m=s.match(/^(\d{4})[.\-\/년\s]+(\d{1,2})/);
+  if(m)return {y:+m[1],m:+m[2]};
+  return null; // 'QMS','MES' 같은 글자 → 시작일 미기재로 처리
+}
+function num(v){if(v==null||v==='')return 0;if(typeof v==='number')return v;const n=Number(String(v).replace(/[^\d.\-]/g,''));return isNaN(n)?0:n;}
+
+// ---------- 셀 색 → 상태 ----------
+function fillStatus(f){
+  if(!f)return null;
+  const rgb=(f.rgb||'').toUpperCase().slice(-6);
+  if(rgb==='FFC000')return '미사용';
+  if(f.theme===0&&f.tint<0)return '해지';
+  if(rgb&&/^[0-9A-F]{6}$/.test(rgb)){const r=parseInt(rgb.slice(0,2),16),g=parseInt(rgb.slice(2,4),16),b=parseInt(rgb.slice(4),16);
+    if(rgb==='000000'||rgb==='FFFFFF')return null;
+    if(Math.abs(r-g)<10&&Math.abs(g-b)<10&&r<0xD0)return '해지';}
+  return '전환';
+}
+
+// ---------- 시트 해석 ----------
+function findHeader(aoa){
+  for(let i=0;i<Math.min(aoa.length,15);i++){const row=aoa[i]||[];if(row.some(c=>String(c||'').replace(/\s/g,'').startsWith('법인명')))return i;}
+  return -1;
+}
+function colIdx(head,...keys){for(const k of keys){const i=head.findIndex(c=>String(c||'').replace(/\s/g,'').startsWith(k));if(i>=0)return i;}return -1;}
+
+function parseBook(book){
+  const names=Object.keys(book.sheets);
+  const useName=names.find(n=>n.includes('사용'))||names[0];
+  const endName=names.find(n=>n.includes('종료')&&n!==useName);
+  const S=book.sheets[useName];const aoa=S.aoa, fills=S.fill||[];
+  const h=findHeader(aoa);if(h<0)throw new Error('‘법인명(상호)’ 머리글을 찾지 못했습니다. 사용 시트 형식을 확인해 주세요.');
+  const head=aoa[h];
+  const C={name:colIdx(head,'법인명'),code:colIdx(head,'코드'),start:colIdx(head,'사용시작','시작일'),mon:colIdx(head,'월금액','월'),
+    cust:colIdx(head,'고객사'),addr:colIdx(head,'주소'),sector:colIdx(head,'종목'),sys:colIdx(head,'시스템'),note:colIdx(head,'비고'),mgr:colIdx(head,'담당자')};
+  const recs=[], pipe=[];let section=null;
+  for(let i=h+1;i<aoa.length;i++){
+    const row=aoa[i]||[];const nm=row[C.name];const nmS=String(nm==null?'':nm).trim();
+    if(!nmS)continue;
+    if(/^영업\s*진행/.test(nmS)){section='진행';continue;}
+    if(/^영업\s*종료/.test(nmS)){section='종료';continue;}
+    if(section){pipe.push({sec:section,name:nmS,who:row[C.name+1]==null?'':String(row[C.name+1]),note:row[C.name+2]==null?'':String(row[C.name+2])});continue;}
+    const code=row[C.code];if(code==null||code==='')continue;
+    const fs=fillStatus((fills[i]||[])[C.name]);
+    const note=row[C.note]==null?'':String(row[C.note]);
+    let st=fs==='해지'||/계약\s*해지/.test(note)?'해지':fs==='미사용'?'미사용':'사용';
+    recs.push({code:String(code),name:nmS,startRaw:row[C.start],start:toYM(row[C.start]),mon:num(row[C.mon]),hasMon:num(row[C.mon])>0,
+      cust:String(row[C.cust]||'').trim()||'(미기재)',addr:String(row[C.addr]||''),prov:provOf(row[C.addr]),sector:String(row[C.sector]||''),
+      sys:String(row[C.sys]||'').toUpperCase().split(/[,\s/]+/).filter(Boolean),note,st,cloud:fs==='전환'});
+  }
+  let ended=[];
+  if(endName){const E=book.sheets[endName].aoa;const eh=findHeader(E);if(eh>=0){const ci=colIdx(E[eh],'법인명');for(let i=eh+1;i<E.length;i++){const v=(E[i]||[])[ci];if(v)ended.push(String(v));}}}
+  return {recs,pipe,ended,sheet:useName};
+}
+
+// ---------- 계산 ----------
+function compute(D,Y,AS){
+  const cur=Y*12+AS;
+  D.recs.forEach(r=>{
+    const s=r.start?r.start.y*12+r.start.m:null;
+    r.isNew=!!(r.start&&r.start.y===Y&&s<=cur);
+    r.plan=r.st==='사용'&&s!=null&&s>cur;
+    r.active=r.st==='사용'&&!r.plan;
+    r.months=[];
+    for(let m=1;m<=AS;m++){const ym=Y*12+m;r.months.push(r.st==='사용'&&(s==null||s<=ym)?r.mon:0);}
+    r.ytd=r.months.reduce((a,b)=>a+b,0);
+  });
+  const act=D.recs.filter(r=>r.active);
+  const byP={};P_ORDER.concat(['미상']).forEach(p=>byP[p]={n:0,rev:0,mrr:0,list:[]});
+  act.forEach(r=>{const b=byP[r.prov];b.n++;b.mrr+=r.mon;b.list.push(r.name);});
+  D.recs.forEach(r=>{if(r.st==='사용')byP[r.prov].rev+=r.ytd;});
+  const monthly=[];for(let m=0;m<AS;m++)monthly.push(D.recs.reduce((a,r)=>a+r.months[m],0));
+  const sys={};act.forEach(r=>r.sys.forEach(s=>{sys[s]=(sys[s]||0)+1;}));
+  const cust={};D.recs.forEach(r=>{if(r.st==='사용'&&r.ytd>0){cust[r.cust]=(cust[r.cust]||0)+r.ytd;}});
+  return {act,byP,monthly,sys,cust,
+    ytd:monthly.reduce((a,b)=>a+b,0),mrr:act.reduce((a,r)=>a+r.mon,0),
+    nNew:act.filter(r=>r.isNew).length,nPlan:D.recs.filter(r=>r.plan).length,nOff:D.recs.filter(r=>r.st==='해지').length+D.ended.length,
+    nCloud:act.filter(r=>r.cloud).length,noMon:act.filter(r=>!r.hasMon),noStart:act.filter(r=>!r.start)};
+}
+
+// ---------- 상태 ----------
+const now=new Date();
+let STATE={book:EMB,src:'내장 데이터 · '+EMB.file,Y:now.getFullYear(),AS:now.getMonth()+1,selProv:''};
+let D=null,R=null;
+
+const tip=$('#tip');
+function showTip(e,html){tip.innerHTML=html;tip.style.opacity=1;const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY+14;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;tip.style.left=x+'px';tip.style.top=y+'px';}
+function hideTip(){tip.style.opacity=0;}
+
+function seqColor(n,max){
+  if(!n)return 'var(--zero)';
+  const steps=['--s100','--s200','--s300','--s400','--s500','--s600','--s700'];
+  const t=max<=1?1:(n-1)/(max-1);return 'var('+steps[Math.min(6,Math.round(t*6))]+')';
+}
+function inkFor(n,max){if(!n)return 'var(--muted)';const t=max<=1?1:(n-1)/(max-1);return Math.round(t*6)>=3?'#fff':'#0b0b0b';}
+
+function render(){
+  D=parseBook(STATE.book);
+  R=compute(D,STATE.Y,STATE.AS);
+  const Y=STATE.Y,AS=STATE.AS;
+  document.querySelectorAll('.yr').forEach(e=>e.textContent=Y);
+  $('#ttlYear').textContent='('+Y+'.'+String(AS).padStart(2,'0')+' 기준)';
+  $('#subline').textContent='출처: '+STATE.src+' · 매출은 '+Y+'년 1~'+AS+'월 월 이용료 합계(부가세 별도)';
+  // 기준월 select
+  const sel=$('#asof');sel.innerHTML='';for(let m=1;m<=12;m++){const o=document.createElement('option');o.value=m;o.textContent=Y+'년 '+m+'월';if(m===AS)o.selected=true;sel.appendChild(o);}
+
+  const nProv=Object.keys(R.byP).filter(p=>p!=='미상'&&R.byP[p].n>0).length;
+  $('#kpis').innerHTML=[
+    ['사용 업체',R.act.length,'개사','클라우드 전환 '+R.nCloud+' · 도입 예정 '+R.nPlan+' · 해지 '+R.nOff],
+    ['분포 지역',nProv,'개 시·도','최다: '+topProv()],
+    [Y+'년 누적 매출',null,null,'1~'+AS+'월 · 부가세 별도',won(R.ytd)],
+    ['월 청구액 (MRR)',null,null,'연 환산 '+won(R.mrr*12),won(R.mrr)],
+    [Y+'년 신규 도입',R.nNew,'개사',R.nPlan?'도입 예정 '+R.nPlan+'개사 별도':'올해 사용 시작 업체'],
+  ].map(k=>'<div class="oc-kpi"><div class="l">'+k[0]+'</div><div class="v">'+(k[4]?esc(k[4]):fmtN(k[1])+'<small>'+k[2]+'</small>')+'</div><div class="n">'+esc(k[3])+'</div></div>').join('');
+
+  drawMap();drawProvTable();drawMonth();drawSys();drawCust();drawPipe();fillProvFilter();drawList();drawNotes();
+}
+function topProv(){const a=Object.entries(R.byP).filter(e=>e[0]!=='미상').sort((a,b)=>b[1].n-a[1].n);return a[0]?a[0][0]+' '+a[0][1].n+'개사':'-';}
+
+// ---------- 지도 ----------
+let MAP=null;
+function loadMap(){
+  const tryImp=u=>import(u).then(m=>{MAP=m.default;});
+  return (APP?tryImp('/lib/south-korea.js'):Promise.reject()).catch(()=>tryImp('https://cdn.jsdelivr.net/npm/@svg-maps/south-korea@1/index.js')).catch(()=>
+    import('https://cdn.jsdelivr.net/npm/@svg-maps/south-korea/index.js').then(m=>{MAP=m.default;})).catch(()=>{MAP=null;});
+}
+// 지도 모듈을 못 불러올 때 쓰는 타일 지도(대략적 위치)
+const TILE={'서울':[1,1],'인천':[0,1],'경기':[1,0],'강원':[2,0],'충북':[2,1],'세종':[1,2],'대전':[2,2],'충남':[0,2],'경북':[3,1],'전북':[1,3],'대구':[3,2],'광주':[0,4],'전남':[1,4],'경남':[2,3],'울산':[4,2],'부산':[3,3],'제주':[0,5]};
+function innerPoint(path){
+  const bb=path.getBBox();const N=28;const pts=[];const inside=[];
+  for(let i=0;i<=N;i++){for(let j=0;j<=N;j++){const x=bb.x+bb.width*i/N,y=bb.y+bb.height*j/N;let ok=false;try{ok=path.isPointInFill(new DOMPoint(x,y));}catch(e){}
+    (ok?inside:pts).push([x,y]);}}
+  if(!inside.length)return [bb.x+bb.width/2,bb.y+bb.height/2];
+  // 바깥 점(경계 밖 포함)까지 최소 거리가 가장 큰 안쪽 점
+  const out=pts.concat([[bb.x-1,bb.y-1]]);for(let i=0;i<=N;i++){out.push([bb.x+bb.width*i/N,bb.y-bb.height/N],[bb.x+bb.width*i/N,bb.y+bb.height*(1+1/N)],[bb.x-bb.width/N,bb.y+bb.height*i/N],[bb.x+bb.width*(1+1/N),bb.y+bb.height*i/N]);}
+  let best=inside[0],bd=-1;for(const a of inside){let m=Infinity;for(const o of out){const d=(a[0]-o[0])**2+(a[1]-o[1])**2;if(d<m)m=d;}if(m>bd){bd=m;best=a;}}
+  return best;
+}
+const LABEL_NUDGE_UNUSED={'gyeonggi':[ -18,-30],'incheon':[-14,4],'seoul':[0,0],'south-chungcheong':[-6,0],'north-gyeongsang':[16,-6],'south-gyeongsang':[-10,4],'south-jeolla':[0,-14],'north-jeolla':[0,4],'gangwon':[0,-6],'north-chungcheong':[-6,-10],'busan':[4,4],'ulsan':[4,0]};
+function drawMap(){
+  const host=$('#map');const max=Math.max(1,...Object.values(R.byP).map(b=>b.n));
+  const tipHtml=p=>{const b=R.byP[p];return '<b>'+p+'</b><br>사용 업체 '+b.n+'개사<br>'+STATE.Y+'년 누적 매출 '+won(b.rev)+'<br>월 청구액 '+won(b.mrr)+(b.list.length?'<br><span style="opacity:.75">'+esc(b.list.slice(0,8).join(', '))+(b.list.length>8?' 외 '+(b.list.length-8):'')+'</span>':'');};
+  let svg;
+  if(MAP){
+    const ns='http://www.w3.org/2000/svg';
+    svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox',MAP.viewBox);svg.setAttribute('role','img');svg.setAttribute('aria-label','시·도별 원클라우드 사용 업체 분포 지도');
+    const g=document.createElementNS(ns,'g'),gl=document.createElementNS(ns,'g');
+    MAP.locations.forEach(loc=>{
+      const p=ID2P[loc.id];if(!p)return;const b=R.byP[p];
+      const path=document.createElementNS(ns,'path');path.setAttribute('d',loc.path);path.setAttribute('fill',seqColor(b.n,max));
+      path.dataset.p=p;if(STATE.selProv===p)path.classList.add('sel');
+      path.addEventListener('mousemove',e=>showTip(e,tipHtml(p)));path.addEventListener('mouseleave',hideTip);
+      path.addEventListener('click',()=>selectProv(p));
+      g.appendChild(path);
+    });
+    svg.appendChild(g);svg.appendChild(gl);
+    host.innerHTML='';host.appendChild(svg);
+    // 라벨: 각 시·도 안쪽에서 가장 깊은 점(섬 제외 효과)
+    const sel=[...g.querySelectorAll('path.sel')];sel.forEach(s=>g.appendChild(s));
+    const METRO=new Set(['seoul','busan','daegu','incheon','gwangju','daejeon','ulsan','sejong']);
+    MAP.locations.forEach(loc=>{
+      const p=ID2P[loc.id];if(!p)return;const b=R.byP[p];
+      const path=[...g.children].find(x=>x.dataset.p===p);
+      const [cx,cy]=innerPoint(path);
+      const metro=METRO.has(loc.id);
+      if(metro&&!b.n)return;
+      const t=document.createElementNS(ns,'text');t.setAttribute('x',cx);t.setAttribute('text-anchor','middle');
+      if(metro){
+        const c=document.createElementNS(ns,'circle');c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',11);c.setAttribute('fill','var(--text)');c.setAttribute('stroke','var(--surface)');c.setAttribute('stroke-width','2');c.style.pointerEvents='none';gl.appendChild(c);
+        t.setAttribute('fill','var(--surface)');t.setAttribute('y',cy+4);t.setAttribute('font-size','11');t.setAttribute('font-weight','700');t.textContent=b.n;gl.appendChild(t);
+        const t2=document.createElementNS(ns,'text');t2.setAttribute('x',cx);t2.setAttribute('y',cy+24);t2.setAttribute('text-anchor','middle');t2.setAttribute('font-size','10');t2.setAttribute('font-weight','700');t2.setAttribute('fill','var(--text)');t2.setAttribute('paint-order','stroke');t2.setAttribute('stroke','var(--surface)');t2.setAttribute('stroke-width','3');t2.textContent=p;gl.appendChild(t2);
+      }else{
+        t.setAttribute('y',b.n?cy-4:cy+4);t.setAttribute('fill',inkFor(b.n,max));
+        t.innerHTML=b.n?'<tspan x="'+cx+'" font-size="12" font-weight="700">'+p+'</tspan><tspan x="'+cx+'" dy="18" font-size="17" font-weight="900">'+b.n+'</tspan>':'<tspan x="'+cx+'" font-size="11">'+p+'</tspan>';
+        gl.appendChild(t);
+      }
+    });
+  }else{
+    // 타일 대체 지도
+    const cell=74,gap=6;const W=5*cell,H=6*cell;
+    let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="시·도별 분포 (타일 지도)">';
+    for(const p of P_ORDER){const [x,y]=TILE[p];const b=R.byP[p];
+      s+='<g><rect data-p="'+p+'" x="'+(x*cell+gap/2)+'" y="'+(y*cell+gap/2)+'" width="'+(cell-gap)+'" height="'+(cell-gap)+'" rx="8" fill="'+seqColor(b.n,max)+'" style="cursor:pointer'+(STATE.selProv===p?';stroke:var(--text);stroke-width:2':'')+'"></rect>'+
+      '<text x="'+(x*cell+cell/2)+'" y="'+(y*cell+cell/2-4)+'" text-anchor="middle" font-size="12" font-weight="700" fill="'+inkFor(b.n,max)+'">'+p+'</text>'+
+      '<text x="'+(x*cell+cell/2)+'" y="'+(y*cell+cell/2+15)+'" text-anchor="middle" font-size="16" font-weight="900" fill="'+inkFor(b.n,max)+'">'+(b.n||'')+'</text></g>';}
+    s+='</svg>';host.innerHTML=s;
+    host.querySelectorAll('rect').forEach(r=>{const p=r.dataset.p;r.addEventListener('mousemove',e=>showTip(e,tipHtml(p)));r.addEventListener('mouseleave',hideTip);r.addEventListener('click',()=>selectProv(p));});
+  }
+  const steps=['--s100','--s200','--s300','--s400','--s500','--s600','--s700'];
+  $('#mapLegend').innerHTML='<span>업체 수</span><i style="background:var(--zero)"></i><span>0</span>'+steps.map((s,i)=>'<i style="background:var('+s+')"></i>').join('')+'<span>'+max+'개사</span>'+(MAP?'':'<span style="margin-left:8px;color:var(--warn)">· 지도 모양을 불러오지 못해 타일 지도로 표시 중</span>');
+}
+function selectProv(p){STATE.selProv=STATE.selProv===p?'':p;$('#fProv').value=STATE.selProv;drawMap();drawProvTable();drawList();
+  if(STATE.selProv)document.getElementById('listCard').scrollIntoView({behavior:'smooth',block:'start'});}
+
+function drawProvTable(){
+  const rows=Object.entries(R.byP).filter(e=>e[1].n>0||e[1].rev>0).sort((a,b)=>b[1].n-a[1].n||b[1].rev-a[1].rev);
+  const maxRev=Math.max(1,...rows.map(r=>r[1].rev));
+  const totN=rows.reduce((a,r)=>a+r[1].n,0),totR=rows.reduce((a,r)=>a+r[1].rev,0);
+  $('#provDesc').textContent=rows.length+'개 지역 · 막대는 누적 매출';
+  $('#provTable').innerHTML='<thead><tr><th>시·도</th><th class="r">업체</th><th class="r">비중</th><th class="r">누적 매출</th><th class="barcell"></th></tr></thead><tbody>'+
+    rows.map(([p,b])=>'<tr class="click'+(STATE.selProv===p?' sel':'')+'" data-p="'+p+'"><td><b>'+p+'</b></td><td class="r">'+b.n+'</td><td class="r">'+(totN?(b.n/totN*100).toFixed(0):0)+'%</td><td class="r">'+wonShort(b.rev)+'</td><td class="barcell"><div class="bar" style="width:'+(b.rev/maxRev*100)+'%"></div></td></tr>').join('')+
+    '</tbody><tfoot><tr><td>합계</td><td class="r">'+totN+'</td><td class="r">100%</td><td class="r">'+wonShort(totR)+'</td><td></td></tr></tfoot>';
+  $('#provTable').querySelectorAll('tr.click').forEach(tr=>tr.addEventListener('click',()=>selectProv(tr.dataset.p)));
+}
+
+// ---------- 차트 ----------
+function niceMax(v){if(v<=0)return 1;const e=Math.pow(10,Math.floor(Math.log10(v)));const f=v/e;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*e;}
+function vbars(host,labels,vals,fmt,tipf){
+  const W=Math.max(320,host.clientWidth||600),H=240,pl=48,pr=8,pt=22,pb=26;
+  const mx=niceMax(Math.max(...vals,1));const iw=W-pl-pr,ih=H-pt-pb;const bw=iw/labels.length;const w=Math.max(6,Math.min(44,bw*0.62));
+  let s='<svg viewBox="0 0 '+W+' '+H+'" height="'+H+'">';
+  for(let i=0;i<=4;i++){const y=pt+ih-ih*i/4;s+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y+'" y2="'+y+'" stroke="var(--grid)"/><text class="ax" x="'+(pl-6)+'" y="'+(y+4)+'" text-anchor="end">'+fmt(mx*i/4)+'</text>';}
+  const last=vals.length-1;
+  vals.forEach((v,i)=>{const h=ih*v/mx;const x=pl+bw*i+(bw-w)/2;const y=pt+ih-h;const r=Math.min(4,h);
+    s+='<path d="M'+x+','+(pt+ih)+'V'+(y+r)+'q0,-'+r+' '+r+',-'+r+'H'+(x+w-r)+'q'+r+',0 '+r+','+r+'V'+(pt+ih)+'Z" fill="var(--accent)"/>';
+    s+='<text class="ax" x="'+(x+w/2)+'" y="'+(H-8)+'" text-anchor="middle">'+labels[i]+'</text>';
+    if(i===last||i===0||v===Math.max(...vals))s+='<text class="lab" x="'+(x+w/2)+'" y="'+(y-6)+'" text-anchor="middle">'+fmt(v)+'</text>';
+    s+='<rect data-i="'+i+'" x="'+(pl+bw*i)+'" y="'+pt+'" width="'+bw+'" height="'+ih+'" fill="transparent"/>';});
+  s+='</svg>';host.innerHTML=s;
+  host.querySelectorAll('rect[data-i]').forEach(r=>{r.addEventListener('mousemove',e=>showTip(e,tipf(+r.dataset.i)));r.addEventListener('mouseleave',hideTip);});
+}
+function hbars(host,labels,vals,fmt,tipf){
+  const W=Math.max(300,host.clientWidth||500),rowH=30,pl=Math.min(130,W*0.34),pr=64,H=labels.length*rowH+6;
+  const mx=Math.max(...vals,1);
+  let s='<svg viewBox="0 0 '+W+' '+H+'" height="'+H+'">';
+  labels.forEach((l,i)=>{const y=i*rowH+6;const w=(W-pl-pr)*vals[i]/mx;const r=Math.min(4,w);
+    s+='<text x="'+(pl-8)+'" y="'+(y+15)+'" text-anchor="end" font-size="12" fill="var(--text2)">'+esc(l)+'</text>';
+    s+='<path d="M'+pl+','+(y+4)+'H'+(pl+w-r)+'q'+r+',0 '+r+','+r+'V'+(y+18-r)+'q0,'+r+' -'+r+','+r+'H'+pl+'Z" fill="var(--accent)"/>';
+    s+='<text x="'+(pl+w+6)+'" y="'+(y+15)+'" font-size="12" font-weight="700" fill="var(--text)">'+fmt(vals[i])+'</text>';
+    s+='<rect data-i="'+i+'" x="0" y="'+y+'" width="'+W+'" height="'+rowH+'" fill="transparent"/>';});
+  s+='</svg>';host.innerHTML=s;
+  if(tipf)host.querySelectorAll('rect[data-i]').forEach(r=>{r.addEventListener('mousemove',e=>showTip(e,tipf(+r.dataset.i)));r.addEventListener('mouseleave',hideTip);});
+}
+function drawMonth(){
+  const labels=R.monthly.map((_,i)=>(i+1)+'월');
+  vbars($('#monthChart'),labels,R.monthly,v=>wonShort(v),i=>{
+    const starters=D.recs.filter(r=>r.start&&r.start.y===STATE.Y&&r.start.m===i+1&&r.st==='사용').map(r=>r.name);
+    const n=D.recs.filter(r=>r.months[i]>0).length;
+    return '<b>'+STATE.Y+'년 '+(i+1)+'월</b><br>매출 '+fmtN(R.monthly[i])+'원<br>과금 업체 '+n+'개사'+(starters.length?'<br>신규: '+esc(starters.join(', ')):'');});
+}
+function drawSys(){
+  const e=Object.entries(R.sys).sort((a,b)=>b[1]-a[1]);
+  hbars($('#sysChart'),e.map(x=>x[0]),e.map(x=>x[1]),v=>v+'개사',i=>'<b>'+e[i][0]+'</b><br>'+e[i][1]+'개사 사용');
+}
+function drawCust(){
+  let e=Object.entries(R.cust).sort((a,b)=>b[1]-a[1]);
+  if(e.length>8){const rest=e.slice(7).reduce((a,x)=>a+x[1],0);e=e.slice(0,7).concat([['기타 '+(Object.keys(R.cust).length-7)+'곳',rest]]);}
+  hbars($('#custChart'),e.map(x=>x[0]),e.map(x=>x[1]),v=>wonShort(v),i=>{const n=D.recs.filter(r=>r.active&&r.cust===e[i][0]).length;return '<b>'+esc(e[i][0])+'</b><br>누적 매출 '+fmtN(e[i][1])+'원'+(n?'<br>협력사 '+n+'개사':'');});
+}
+function drawPipe(){
+  const g={진행:[],종료:[]};D.pipe.forEach(p=>g[p.sec]&&g[p.sec].push(p));
+  if(!D.pipe.length){$('#pipe').innerHTML='<div class="oc-note">엑셀에 영업 진행 항목이 없습니다.</div>';return;}
+  $('#pipe').innerHTML=['진행','종료'].filter(k=>g[k].length).map(k=>'<div class="pipe-sec">영업 '+k+' · '+g[k].length+'건</div>'+
+    g[k].map(p=>'<div class="pipe-item'+(k==='종료'?' drop':'')+'"><b>'+esc(p.name)+'</b><span class="who">'+esc(p.who)+'</span><span>'+esc(p.note)+'</span></div>').join('')).join('');
+}
+function fillProvFilter(){
+  const s=$('#fProv');const ps=P_ORDER.filter(p=>D.recs.some(r=>r.prov===p)).concat(D.recs.some(r=>r.prov==='미상')?['미상']:[]);
+  s.innerHTML='<option value="">전체 지역</option>'+ps.map(p=>'<option'+(p===STATE.selProv?' selected':'')+'>'+p+'</option>').join('');
+}
+function startTxt(r){if(r.start)return r.start.y+'.'+String(r.start.m).padStart(2,'0');return r.startRaw==null||r.startRaw===''?'-':esc(typeof r.startRaw==='object'?'':r.startRaw);}
+function drawList(){
+  const q=$('#q').value.trim().toLowerCase(),fp=$('#fProv').value,fs=$('#fSt').value;
+  STATE.selProv=fp;
+  let rows=D.recs.filter(r=>{
+    if(fp&&r.prov!==fp)return false;
+    if(fs==='active'&&!r.active)return false;if(fs==='new'&&!r.isNew)return false;if(fs==='plan'&&!r.plan)return false;if(fs==='off'&&r.st!=='해지')return false;
+    if(q&&!(r.name+' '+r.cust+' '+r.sys.join(' ')+' '+r.sector+' '+r.addr).toLowerCase().includes(q))return false;return true;});
+  rows.sort((a,b)=>P_ORDER.indexOf(a.prov)-P_ORDER.indexOf(b.prov)||b.ytd-a.ytd);
+  const pill=r=>r.st==='해지'?'<span class="pill off">해지</span>':r.st==='미사용'?'<span class="pill off">미사용</span>':r.plan?'<span class="pill plan">도입 예정</span>':r.isNew?'<span class="pill new">신규</span>':'<span class="pill">사용</span>';
+  $('#list').innerHTML='<thead><tr><th>지역</th><th>업체명</th><th>상태</th><th>고객사</th><th>종목</th><th>시스템</th><th>사용시작</th><th class="r">월 금액</th><th class="r">'+STATE.Y+' 누적</th></tr></thead><tbody>'+
+    rows.map(r=>'<tr><td>'+r.prov+'</td><td><b>'+esc(r.name)+'</b>'+(r.cloud?' <span class="pill" title="클라우드 전환 완료">전환</span>':'')+'</td><td>'+pill(r)+'</td><td>'+esc(r.cust)+'</td><td>'+esc(r.sector)+'</td><td>'+esc(r.sys.join(', '))+'</td><td>'+startTxt(r)+'</td><td class="r">'+(r.hasMon?fmtN(r.mon):'<span style="color:var(--warn)">미입력</span>')+'</td><td class="r">'+(r.ytd?fmtN(r.ytd):'-')+'</td></tr>').join('')+'</tbody>';
+  const sum=rows.reduce((a,r)=>a+(r.st==='사용'?r.ytd:0),0);
+  $('#listCount').textContent=rows.length+'개사 · 누적 '+won(sum);
+  if(MAP||true){document.querySelectorAll('#map path,#map rect').forEach(p=>{p.classList.toggle('sel',p.dataset.p===fp);});
+    document.querySelectorAll('#provTable tr.click').forEach(tr=>tr.classList.toggle('sel',tr.dataset.p===fp));}
+}
+function drawNotes(){
+  const n=[];
+  n.push('<b>집계 기준</b> — ‘사용’ 시트의 업체 행(코드가 있는 행). 법인명 칸이 회색이면 해지, 주황(FFC000)이면 미사용, 그 밖의 색은 클라우드 전환 완료로 봅니다. ‘종료’ 시트 '+D.ended.length+'건은 해지 수에 더합니다.');
+  n.push('<b>매출</b> — 월금액 × '+STATE.Y+'년 중 사용한 달 수(1월~기준월). 사용시작일이 비어 있거나 날짜가 아닌 글자(QMS, MES 등)면 올해 1월 이전부터 사용 중으로 봅니다. 시작일이 기준월 이후면 ‘도입 예정’으로 매출에서 뺍니다.');
+  if(R.noMon.length)n.push('<b style="color:var(--warn)">확인 필요</b> — 월금액 미입력으로 매출 0 처리: '+esc(R.noMon.map(r=>r.name).join(', ')));
+  const unk=D.recs.filter(r=>r.prov==='미상'&&r.st==='사용');if(unk.length)n.push('<b style="color:var(--warn)">주소 확인</b> — 시·도를 읽지 못한 업체: '+esc(unk.map(r=>r.name).join(', ')));
+  $('#notes').innerHTML=n.join('<br>');
+}
+
+// ---------- 엑셀 불러오기 ----------
+// ---------- 내장 엑셀(.xlsx) 해석기: 외부 라이브러리 없이 동작 ----------
+function loadXLSX(){return Promise.resolve();}
+async function inflateRaw(u8){const ds=new DecompressionStream('deflate-raw');const s=new Blob([u8]).stream().pipeThrough(ds);return new Uint8Array(await new Response(s).arrayBuffer());}
+async function unzip(buf){
+  const u8=new Uint8Array(buf),dv=new DataView(buf);let e=-1;
+  for(let i=u8.length-22;i>=Math.max(0,u8.length-65558);i--){if(dv.getUint32(i,true)===0x06054b50){e=i;break;}}
+  if(e<0)throw new Error('xlsx 형식이 아닙니다 (.xls 옛 형식이면 Excel에서 .xlsx로 저장해 주세요)');
+  const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);const out={};const td=new TextDecoder();
+  for(let k=0;k<n;k++){
+    const method=dv.getUint16(p+10,true),csize=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),off=dv.getUint32(p+42,true);
+    const name=td.decode(u8.subarray(p+46,p+46+nl));p+=46+nl+xl+cl;
+    const lnl=dv.getUint16(off+26,true),lxl=dv.getUint16(off+28,true);const data=u8.subarray(off+30+lnl+lxl,off+30+lnl+lxl+csize);
+    out[name]={method,data};
+  }
+  return {get:async name=>{const f=out[name];if(!f)return null;const b=f.method===0?f.data:await inflateRaw(f.data);return td.decode(b);}};
+}
+const xmlp=s=>new DOMParser().parseFromString(s,'application/xml');
+const kids=(el,tag)=>el?[...el.getElementsByTagName(tag)]:[];
+function colNum(ref){let n=0;for(const ch of ref.replace(/\d+/g,''))n=n*26+ch.charCodeAt(0)-64;return n-1;}
+async function readXlsx(buf){
+  const z=await unzip(buf);
+  const wb=xmlp(await z.get('xl/workbook.xml'));const rels=xmlp(await z.get('xl/_rels/workbook.xml.rels')||'<r/>');
+  const relMap={};kids(rels,'Relationship').forEach(r=>{relMap[r.getAttribute('Id')]=r.getAttribute('Target');});
+  const ssx=await z.get('xl/sharedStrings.xml');const ss=ssx?kids(xmlp(ssx),'si').map(si=>kids(si,'t').map(t=>t.textContent).join('')):[];
+  const stx=await z.get('xl/styles.xml');let xfFill=[],fills=[];
+  if(stx){const st=xmlp(stx);
+    fills=kids(kids(st,'fills')[0],'fill').map(f=>{const pf=kids(f,'patternFill')[0];if(!pf)return null;const pt=pf.getAttribute('patternType');if(!pt||pt==='none')return null;
+      const fg=kids(pf,'fgColor')[0];const o={};if(fg){if(fg.hasAttribute('theme')){o.theme=+fg.getAttribute('theme');o.tint=+(fg.getAttribute('tint')||0);}if(fg.hasAttribute('rgb'))o.rgb=fg.getAttribute('rgb');}return o;});
+    xfFill=kids(kids(st,'cellXfs')[0],'xf').map(x=>+(x.getAttribute('fillId')||0));}
+  const sheets={};
+  for(const sh of kids(wb,'sheet')){
+    const rid=sh.getAttribute('r:id')||sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
+    let target=relMap[rid]||'';target=target.startsWith('/')?target.slice(1):'xl/'+target.replace(/^\.\//,'');
+    const sx=await z.get(target);if(!sx){continue;}
+    const doc=xmlp(sx);const aoa=[],fill=[];
+    kids(doc,'row').forEach(row=>{const r=+row.getAttribute('r')-1;
+      kids(row,'c').forEach(c=>{const ref=c.getAttribute('r');const ci=colNum(ref);const t=c.getAttribute('t');const s=+(c.getAttribute('s')||0);
+        const vEl=kids(c,'v')[0];let v=null;
+        if(t==='s')v=vEl?ss[+vEl.textContent]:null;else if(t==='inlineStr')v=kids(c,'t').map(x=>x.textContent).join('');
+        else if(t==='b')v=vEl?vEl.textContent==='1':null;else if(t==='str'||t==='e')v=vEl?vEl.textContent:null;
+        else if(vEl){v=Number(vEl.textContent);}
+        (aoa[r]=aoa[r]||[])[ci]=v;(fill[r]=fill[r]||[])[ci]=fills[xfFill[s]]||null;});});
+    for(let i=0;i<aoa.length;i++){aoa[i]=aoa[i]||[];fill[i]=fill[i]||[];}
+    sheets[sh.getAttribute('name')]={aoa,fill};
+  }
+  return {sheets};
+}
+async function readBook(buf){const book=await readXlsx(buf);parseBook(book);return book;}
+function setStatus(t,cls){const s=$('#status');s.textContent=t;s.className='oc-status '+(cls||'');}
+async function handleFile(file){
+  if(!file)return;setStatus('불러오는 중… '+file.name);
+  try{await loadXLSX();const buf=await file.arrayBuffer();
+    const book=await readBook(buf);
+    STATE.book=book;STATE.src=file.name+' (불러온 시각 '+new Date().toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+')';
+    STATE.selProv='';render();setStatus('갱신 완료 — '+file.name,'ok');
+    try{localStorage.setItem('oc-last-book',JSON.stringify({book,src:STATE.src}));}catch(e){}
+  }catch(e){setStatus('불러오지 못했습니다: '+e.message,'err');}
+}
+const drop=$('#drop');
+['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+['dragleave','drop'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();if(ev==='drop'||e.target===document.documentElement)drop.classList.remove('over');}));
+document.addEventListener('drop',e=>{drop.classList.remove('over');const f=e.dataTransfer&&e.dataTransfer.files[0];handleFile(f);});
+$('#pickBtn').addEventListener('click',()=>$('#file').click());
+$('#file').addEventListener('change',e=>{handleFile(e.target.files[0]);e.target.value='';});
+$('#resetBtn').addEventListener('click',()=>{STATE.book=EMB;STATE.src='내장 데이터 · '+EMB.file;STATE.selProv='';try{localStorage.removeItem('oc-last-book');}catch(e){}render();setStatus('기본 데이터로 되돌렸습니다','ok');});
+$('#asof').addEventListener('change',e=>{STATE.AS=+e.target.value;render();});
+$('#q').addEventListener('input',drawList);
+$('#fProv').addEventListener('change',()=>{STATE.selProv=$('#fProv').value;drawList();});
+$('#fSt').addEventListener('change',drawList);
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(R){drawMonth();drawSys();drawCust();}},150);});
+
+// ---------- 프로그램 모드: 로컬 서버의 엑셀을 자동으로 읽고 바뀌면 다시 계산 ----------
+const tm=d=>new Date(d).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+let lastM=null,busy=false;
+async function syncFromServer(force){
+  if(busy)return;busy=true;
+  try{
+    const st=await (await fetch('/api/stat',{cache:'no-store'})).json();
+    if(!st.found){setStatus('엑셀 파일을 찾지 못했습니다: '+st.path+' — config.json의 경로를 확인해 주세요.','err');return;}
+    if(!force&&st.mtime===lastM)return;
+    setStatus('엑셀 읽는 중… '+st.name);
+    await loadXLSX();
+    const res=await fetch('/api/data',{cache:'no-store'});if(!res.ok)throw new Error('엑셀을 읽지 못했습니다 (엑셀에서 저장 중이면 잠시 후 다시 시도합니다)');
+    const book=await readBook(await res.arrayBuffer());
+    const first=lastM===null;lastM=st.mtime;
+    STATE.book=book;STATE.src=st.name+' (엑셀 저장 '+tm(st.mtime)+')';render();
+    setStatus((first?'연결됨':'자동 갱신됨')+' · '+tm(Date.now())+' · 엑셀을 저장하면 몇 초 안에 반영됩니다','ok');
+  }catch(e){setStatus(e.message||String(e),'err');}
+  finally{busy=false;}
+}
+function setupApp(){
+  document.body.classList.add('app');
+  $('#drop').firstElementChild.innerHTML='<b>자동 갱신</b> — <span id="srcPath"></span> 파일을 지켜보고 있다가, 엑셀에서 저장하면 지도·매출·목록을 다시 계산합니다. 다른 파일을 끌어다 놓아 미리 볼 수도 있습니다.';
+  fetch('/api/stat').then(r=>r.json()).then(s=>{$('#srcPath').textContent=s.path;});
+  const bar=$('.oc-ctrl');
+  const openB=document.createElement('button');openB.className='oc-btn ghost';openB.type='button';openB.textContent='원본 엑셀 열기';
+  openB.addEventListener('click',()=>fetch('/api/open?f=use',{method:'POST'}));bar.insertBefore(openB,$('#pickBtn'));
+  $('#resetBtn').textContent='지금 새로고침';
+  const rb=$('#resetBtn').cloneNode(true);$('#resetBtn').replaceWith(rb);rb.addEventListener('click',()=>syncFromServer(true));
+  syncFromServer(true);setInterval(()=>syncFromServer(false),4000);
+}
+let APP=false;
+window.OC={readXlsx,esc,fmtN,won,wonShort,showTip,hideTip,niceMax,redraw:()=>{if(R){drawMonth();drawSys();drawCust();}}};
+try{render();}catch(e){setStatus('데이터 해석 오류: '+e.message,'err');}
+fetch('/api/stat',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json();}).then(()=>{APP=true;setupApp();})
+  .catch(()=>{APP=false;try{const s=JSON.parse(localStorage.getItem('oc-last-book')||'null');if(s&&s.book){STATE.book=s.book;STATE.src=s.src+' · 이 브라우저에 저장된 최근 파일';render();}}catch(e){}})
+  .finally(()=>loadMap().then(()=>{try{drawMap();}catch(e){}}));
+})();
+</script>
+<script>
+(function(){
+'use strict';
+const OC=window.OC;const $=s=>document.querySelector(s);
+const {esc,fmtN,won,wonShort,showTip,hideTip,niceMax}=OC;
+const PS={book:null,asof:null,lastM:null,busy:false,data:null};
+const serialToDate=v=>{if(typeof v==='number'&&v>20000&&v<80000){const d=new Date(Math.round((v-25569)*864e5));return new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());}
+  if(v&&typeof v==='object'&&v.d){const [y,m,dd]=v.d.split('-').map(Number);return new Date(y,m-1,dd);}
+  if(typeof v==='string'){const m=v.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);}return null;};
+const num=v=>{if(v==null||v==='')return 0;if(typeof v==='number')return v;const n=Number(String(v).replace(/[^\d.\-]/g,''));return isNaN(n)?0:n;};
+const md=d=>(d.getMonth()+1)+'/'+d.getDate();
+const ymd=d=>d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
+
+function parsePay(book){
+  const name=Object.keys(book.sheets)[0];const aoa=book.sheets[name].aoa;
+  let h=-1;for(let i=0;i<Math.min(aoa.length,20);i++){const r=aoa[i]||[];if(r.some(c=>String(c||'').replace(/\s/g,'')==='기준')){h=i;break;}}
+  if(h<0)throw new Error('입금내역정리: ‘기준’ 머리글을 찾지 못했습니다');
+  const head=aoa[h];const ci=head.findIndex(c=>String(c||'').replace(/\s/g,'')==='기준');
+  const cols=[];head.forEach((c,j)=>{const m=String(c||'').match(/^\s*(\d{1,2})\s*월\s*$/);if(m)cols.push({j,m:+m[1]});});
+  if(!cols.length)throw new Error('입금내역정리: 월 머리글(1월, 2월 …)을 찾지 못했습니다');
+  // 연도: 마지막 열이 올해(또는 마지막 열 월이 현재보다 뒤면 작년), 앞으로 거슬러 가며 1월→12월 넘어갈 때 1년 빼기
+  const now=new Date();let y=cols[cols.length-1].m<=now.getMonth()+1?now.getFullYear():now.getFullYear()-1;
+  for(let k=cols.length-1;k>=0;k--){cols[k].y=y;if(k>0&&cols[k-1].m>cols[k].m)y--;}
+  const months=cols.map(c=>({y:c.y,m:c.m,label:(c.m===1||cols[0]===c?String(c.y).slice(2)+'년 ':'')+c.m+'월'}));
+  const comps=[];let cur=null;
+  for(let i=h+1;i<aoa.length;i++){
+    const r=aoa[i]||[];const key=String(r[ci]||'').replace(/\s/g,'');const nm=String(r[0]==null?'':r[0]).trim();
+    if(key.startsWith('월금액')){cur={name:nm||(cur?cur.name+'?':'(이름 없음)'),order:comps.length,due:cols.map(c=>num(r[c.j])),paid:cols.map(()=>0),date:cols.map(()=>null),note:cols.map(()=>'')};comps.push(cur);}
+    else if(cur&&key.startsWith('입금액')){cur.paid=cols.map(c=>num(r[c.j]));}
+    else if(cur&&key.startsWith('입금일')){cur.date=cols.map(c=>serialToDate(r[c.j]));cur.note=cols.map(c=>{const v=r[c.j];return typeof v==='string'&&!serialToDate(v)?v.trim():'';});}
+  }
+  return {sheet:name,months,comps};
+}
+function lastDay(y,m){return new Date(y,m,0);}
+function cellState(c,i,k,months){
+  const due=c.due[i],paid=c.paid[i];
+  if(!due&&!paid)return 'none';
+  if(i>k)return paid?'paid':'future';
+  if(paid>=due&&due>0||(!due&&paid)){
+    const d=c.date[i];if(d){const mo=months[i];const lim=lastDay(mo.y,mo.m+1);if(d>lim)return 'late';}
+    return 'paid';}
+  if(paid>0)return 'part';
+  return 'due';
+}
+function compute(P,k){
+  P.comps.forEach(c=>{
+    c.st=c.due.map((_,i)=>cellState(c,i,k,P.months));
+    c.billed=c.due.slice(0,k+1).reduce((a,b)=>a+b,0);
+    c.recv=c.paid.slice(0,k+1).reduce((a,b)=>a+b,0);
+    c.unpaid=c.due.reduce((a,d,i)=>a+(i<=k?Math.max(0,d-c.paid[i]):0),0);
+    c.dueMonths=c.st.map((s,i)=>s==='due'||s==='part'?i:-1).filter(i=>i>=0);
+    c.lateN=c.st.filter(s=>s==='late').length;
+    const ds=c.date.filter(Boolean);c.lastPay=ds.length?new Date(Math.max(...ds)):null;
+  });
+  const m=P.months.map((_,i)=>({bill:P.comps.reduce((a,c)=>a+c.due[i],0),paid:P.comps.reduce((a,c)=>a+c.paid[i],0)}));
+  const billed=P.comps.reduce((a,c)=>a+c.billed,0),recv=P.comps.reduce((a,c)=>a+c.recv,0),unpaid=P.comps.reduce((a,c)=>a+c.unpaid,0);
+  return {m,billed,recv,unpaid,dueComps:P.comps.filter(c=>c.unpaid>0),long:P.comps.filter(c=>c.dueMonths.length>=3)};
+}
+function monthRange(idx,months){ // 연속 구간 묶기: 8~11월
+  if(!idx.length)return '';const out=[];let s=idx[0],p=idx[0];
+  const lab=i=>months[i].m+'월';
+  for(let t=1;t<=idx.length;t++){const v=idx[t];if(v===p+1){p=v;continue;}out.push(s===p?lab(s):lab(s)+'~'+lab(p));s=p=v;}
+  return out.join(', ');
+}
+function render(){
+  const P=PS.data;if(!P)return;const n=P.months.length;
+  if(PS.asof==null||PS.asof>=n){ // 기본: 납부 기한(그달 말)이 지난 마지막 달
+    const today=new Date();let d=-1;P.months.forEach((mo,i)=>{if(lastDay(mo.y,mo.m)<new Date(today.getFullYear(),today.getMonth(),today.getDate()))d=i;});PS.asof=d<0?n-1:d;}
+  const k=PS.asof;
+  const R=compute(P,k);PS.R=R;
+  const sel=$('#pyAsof');sel.innerHTML=P.months.map((mo,i)=>'<option value="'+i+'"'+(i===k?' selected':'')+'>'+mo.y+'년 '+mo.m+'월분까지</option>').join('');
+  const mk=P.months[k],m0=P.months[0];
+  $('#pyTtl').textContent='('+mk.y+'.'+String(mk.m).padStart(2,'0')+' 기준)';
+  $('#pySub').textContent='출처: '+(PS.src||'')+' · 기간 '+m0.y+'.'+m0.m+' ~ '+mk.y+'.'+mk.m+' · 금액 부가세 포함';
+  const rate=R.billed?R.recv/R.billed*100:0;
+  $('#pyKpis').innerHTML=[
+    ['청구 합계',won(R.billed),P.comps.length+'개사 · '+(k+1)+'개월'],
+    ['입금 합계',won(R.recv),'수납률 '+rate.toFixed(1)+'%'],
+    ['미수금',won(R.unpaid),R.dueComps.length+'개사 미납'],
+    ['3개월 이상 미납',R.long.length+'개사',R.long.length?R.long.slice(0,3).map(c=>c.name).join(', ')+(R.long.length>3?' 외':''):'없음'],
+    ['늦은 입금',P.comps.filter(c=>c.lateN).length+'개사','청구월 다음달 말을 넘겨 입금된 건 '+P.comps.reduce((a,c)=>a+c.lateN,0)+'건'],
+  ].map(x=>'<div class="oc-kpi"><div class="l">'+x[0]+'</div><div class="v" style="font-size:24px">'+esc(x[1])+'</div><div class="n">'+esc(x[2])+'</div></div>').join('');
+  drawMonth();drawDue();drawGrid();
+}
+function drawMonth(){
+  const P=PS.data,R=PS.R,k=PS.asof;const host=$('#pyMonth');if(!host.clientWidth)return;
+  const W=host.clientWidth,H=250,pl=52,pr=8,pt=14,pb=26;const n=P.months.length;
+  const mx=niceMax(Math.max(1,...R.m.map(x=>Math.max(x.bill,x.paid))));const iw=W-pl-pr,ih=H-pt-pb,bw=iw/n,w=Math.max(4,Math.min(18,bw*0.32));
+  let s='<svg viewBox="0 0 '+W+' '+H+'" height="'+H+'">';
+  for(let i=0;i<=4;i++){const y=pt+ih-ih*i/4;s+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y+'" y2="'+y+'" stroke="var(--grid)"/><text class="ax" x="'+(pl-6)+'" y="'+(y+4)+'" text-anchor="end">'+wonShort(mx*i/4)+'</text>';}
+  const bar=(x,v,col,op)=>{const h=ih*v/mx;if(h<=0)return '';const y=pt+ih-h,r=Math.min(4,h);return '<path d="M'+x+','+(pt+ih)+'V'+(y+r)+'q0,-'+r+' '+r+',-'+r+'H'+(x+w-r)+'q'+r+',0 '+r+','+r+'V'+(pt+ih)+'Z" fill="'+col+'" opacity="'+op+'"/>';};
+  R.m.forEach((d,i)=>{const cx=pl+bw*i+bw/2;const op=i>k?0.35:1;
+    s+=bar(cx-w-1,d.bill,'var(--py-bill)',op)+bar(cx+1,d.paid,'var(--py-paid)',op);
+    s+='<text class="ax" x="'+cx+'" y="'+(H-8)+'" text-anchor="middle">'+P.months[i].m+'월</text>';
+    s+='<rect data-i="'+i+'" x="'+(pl+bw*i)+'" y="'+pt+'" width="'+bw+'" height="'+ih+'" fill="transparent"/>';});
+  s+='</svg>';host.innerHTML=s;
+  host.querySelectorAll('rect[data-i]').forEach(r=>{r.addEventListener('mousemove',e=>{const i=+r.dataset.i,d=R.m[i],mo=P.months[i];
+    const miss=P.comps.filter(c=>c.st[i]==='due'||c.st[i]==='part').map(c=>c.name);
+    showTip(e,'<b>'+mo.y+'년 '+mo.m+'월분</b><br>청구 '+fmtN(d.bill)+'원<br>입금 '+fmtN(d.paid)+'원 ('+(d.bill?(d.paid/d.bill*100).toFixed(1):0)+'%)'+(i>k?'<br><span style="opacity:.75">기준월 이후</span>':'')+(miss.length?'<br>미납 '+miss.length+'곳: '+esc(miss.slice(0,6).join(', '))+(miss.length>6?' 외':''):''));});r.addEventListener('mouseleave',hideTip);});
+}
+function drawDue(){
+  const P=PS.data,R=PS.R;const rows=R.dueComps.slice().sort((a,b)=>b.unpaid-a.unpaid);
+  $('#pyDueDesc').textContent=rows.length?rows.length+'개사 · 합계 '+won(R.unpaid)+' · 미수금 많은 순':'기준월까지 미수금이 없습니다';
+  $('#pyDue').innerHTML='<thead><tr><th>업체</th><th>미납 월</th><th class="r">미수금</th><th class="r">최근 입금</th></tr></thead><tbody>'+
+    rows.map(c=>'<tr class="click" data-o="'+c.order+'"><td><b>'+esc(c.name)+'</b></td><td>'+esc(monthRange(c.dueMonths,P.months))+(c.dueMonths.length>=3?' <span class="py-badge due">'+c.dueMonths.length+'개월</span>':'')+'</td><td class="r">'+fmtN(c.unpaid)+'</td><td class="r">'+(c.lastPay?md(c.lastPay):'없음')+'</td></tr>').join('')+'</tbody>';
+  $('#pyDue').querySelectorAll('tr.click').forEach(tr=>tr.addEventListener('click',()=>openDetail(+tr.dataset.o)));
+}
+function drawGrid(){
+  const P=PS.data;const q=$('#pyQ').value.trim().toLowerCase(),srt=$('#pySort').value,only=$('#pyOnly').value;
+  let rows=P.comps.filter(c=>(!q||c.name.toLowerCase().includes(q))&&(!only||(only==='due'?c.unpaid>0:c.lateN>0)));
+  if(srt==='due')rows.sort((a,b)=>b.unpaid-a.unpaid||a.order-b.order);else if(srt==='name')rows.sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+  const tag={paid:'입금',late:'늦은 입금',part:'일부 입금',due:'미납',future:'기준월 이후',none:'청구 없음'};
+  $('#pyGrid').innerHTML='<thead><tr><th>업체 ('+rows.length+')</th>'+P.months.map(m=>'<th>'+esc(m.label)+'</th>').join('')+'<th class="r">입금 합계</th><th class="r">미수금</th></tr></thead><tbody>'+
+    rows.map(c=>'<tr><td><button class="py-name" data-o="'+c.order+'">'+esc(c.name)+'</button></td>'+c.st.map((s,i)=>{
+      const txt=s==='none'?'·':s==='due'?'미납':s==='future'?(c.due[i]?'예정':''):s==='part'?'일부':(c.date[i]?md(c.date[i]):'입금');
+      return '<td class="c s-'+s+'" data-o="'+c.order+'" data-i="'+i+'" aria-label="'+tag[s]+'"><span>'+txt+'</span></td>';}).join('')+
+      '<td class="amt">'+fmtN(c.recv)+'</td><td class="amt'+(c.unpaid?' bad':'')+'">'+(c.unpaid?fmtN(c.unpaid):'-')+'</td></tr>').join('')+'</tbody>';
+  const g=$('#pyGrid');
+  g.querySelectorAll('td.c').forEach(td=>{td.addEventListener('mousemove',e=>{const c=P.comps[+td.dataset.o],i=+td.dataset.i,mo=P.months[i],s=c.st[i];
+    showTip(e,'<b>'+esc(c.name)+'</b> · '+mo.y+'년 '+mo.m+'월분<br>상태: '+tag[s]+'<br>청구 '+fmtN(c.due[i])+'원 / 입금 '+fmtN(c.paid[i])+'원'+(c.date[i]?'<br>입금일 '+ymd(c.date[i]):'')+(c.note[i]?'<br>메모: '+esc(c.note[i]):''));});td.addEventListener('mouseleave',hideTip);});
+  g.querySelectorAll('.py-name').forEach(b=>b.addEventListener('click',()=>openDetail(+b.dataset.o)));
+}
+function openDetail(o){
+  const P=PS.data,c=P.comps[o];const tag={paid:'입금',late:'늦은 입금',part:'일부 입금',due:'미납',future:'기준월 이후',none:'-'};
+  $('#pyDlgBody').innerHTML='<h2 style="margin:0 0 4px;font-size:18px">'+esc(c.name)+'</h2><p class="d" style="margin:0 0 12px">청구 '+fmtN(c.billed)+'원 · 입금 '+fmtN(c.recv)+'원 · '+(c.unpaid?'<span class="py-badge due">미수 '+fmtN(c.unpaid)+'원</span>':'<span class="py-badge ok">미수 없음</span>')+'</p>'+
+    '<table class="oc-t"><thead><tr><th>월</th><th class="r">청구</th><th class="r">입금</th><th>입금일</th><th>상태</th></tr></thead><tbody>'+
+    P.months.map((m,i)=>c.due[i]||c.paid[i]?'<tr><td>'+m.y+'.'+m.m+'</td><td class="r">'+fmtN(c.due[i])+'</td><td class="r">'+(c.paid[i]?fmtN(c.paid[i]):'-')+'</td><td>'+(c.date[i]?ymd(c.date[i]):esc(c.note[i]||''))+'</td><td>'+tag[c.st[i]]+'</td></tr>':'').join('')+'</tbody></table>';
+  $('#pyDlg').hidden=false;
+}
+$('#pyX').addEventListener('click',()=>{$('#pyDlg').hidden=true;});
+$('#pyDlg').addEventListener('click',e=>{if(e.target.id==='pyDlg')$('#pyDlg').hidden=true;});
+addEventListener('keydown',e=>{if(e.key==='Escape')$('#pyDlg').hidden=true;});
+$('#pyAsof').addEventListener('change',e=>{PS.asof=+e.target.value;render();});
+['#pyQ','#pySort','#pyOnly'].forEach(s=>$(s).addEventListener(s==='#pyQ'?'input':'change',drawGrid));
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(PS.data&&!$('#tab-pay').hidden)drawMonth();},150);});
+
+const tm=d=>new Date(d).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+function setSt(t,cls){const s=$('#pyStatus');s.textContent=t;s.className='oc-status '+(cls||'');}
+async function sync(force){
+  if(PS.busy)return;PS.busy=true;
+  try{
+    const r=await fetch('/api/stat?f=pay',{cache:'no-store'});if(!r.ok)throw new Error('프로그램(현황판 실행)으로 열어야 입금 내역을 읽을 수 있습니다');
+    const st=await r.json();$('#pyPath').textContent=st.path;
+    if(!st.found){setSt('입금내역 파일을 찾지 못했습니다: '+st.path+' — config.json의 payment 경로를 확인해 주세요.','err');return;}
+    if(!force&&st.mtime===PS.lastM)return;
+    const res=await fetch('/api/data?f=pay',{cache:'no-store'});if(!res.ok)throw new Error('입금내역을 읽지 못했습니다 (저장 중이면 잠시 후 다시 시도합니다)');
+    const book=await OC.readXlsx(await res.arrayBuffer());const P=parsePay(book);
+    const first=PS.lastM===null;PS.lastM=st.mtime;PS.data=P;PS.src=st.name+' (저장 '+tm(st.mtime)+')';
+    render();setSt((first?'연결됨':'자동 갱신됨')+' · '+tm(Date.now()),'ok');
+  }catch(e){setSt(e.message||String(e),'err');}
+  finally{PS.busy=false;}
+}
+$('#pyRefresh').addEventListener('click',()=>sync(true));
+$('#pyOpen').addEventListener('click',()=>fetch('/api/open?f=pay',{method:'POST'}));
+
+// 탭
+function showTab(t){
+  const pay=t==='pay';$('#tab-usage').hidden=pay;$('#tab-pay').hidden=!pay;
+  document.querySelectorAll('.oc-tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===t)));
+  try{history.replaceState(null,'',pay?'#pay':'#usage');}catch(e){}
+  if(pay){if(!PS.data)sync(true);else{render();}}else{try{OC.redraw&&OC.redraw();}catch(e){}}
+}
+document.querySelectorAll('.oc-tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+showTab(location.hash==='#pay'?'pay':'usage');
+sync(true);setInterval(()=>sync(false),4000);
+})();
+</script>
+</body>
+</html>
